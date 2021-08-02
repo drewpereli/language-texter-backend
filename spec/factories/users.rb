@@ -4,6 +4,8 @@ FactoryBot.define do
   factory :user do
     username { "luther_manhole" }
     phone_number { "1234567890" }
-    password_digest { "my-password" }
+    password { "my-password" }
+    password_confirmation { "my-password" }
+    password_digest { "my-password-digest" }
   end
 end

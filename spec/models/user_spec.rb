@@ -28,6 +28,43 @@ RSpec.describe User, type: :model do
       end
     end
 
+    context "when password is empty" do
+      let(:user) { create(:user) }
+
+      before do
+        user.password = nil
+      end
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+
+    context "when password_confirmation is empty" do
+      let(:user) { create(:user) }
+
+      before do
+        user.password_confirmation = nil
+      end
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+
+    context "when password doesn't match password confirmation" do
+      let(:user) { create(:user) }
+
+      before do
+        user.password = "foo"
+        user.password_confirmation = "bar"
+      end
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+
     context "when all required fields are present" do
       let(:user) { create(:user) }
 
