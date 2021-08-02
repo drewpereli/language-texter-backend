@@ -6,6 +6,7 @@ AllCops:
     - 'config/**/*'
     - 'script/**/*'
     - 'bin/*'
+    - 'Guardfile'
   NewCops: enable
 
 Style/StringLiterals:
