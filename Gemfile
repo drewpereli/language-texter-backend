@@ -52,3 +52,5 @@ group :development do
 end
 
 gem "bcrypt"
+
+gem "jwt"
