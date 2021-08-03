@@ -11,4 +11,12 @@ class User < ApplicationRecord
   def token
     JWT.encode({user_id: id}, Rails.application.secrets.secret_key_base)
   end
+
+  def text(message)
+    twilio_client.text_number(phone_number, message)
+  end
+
+  def twilio_client
+    @twilio_client ||= TwilioClient.new
+  end
 end

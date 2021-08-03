@@ -56,3 +56,5 @@ gem "bcrypt"
 gem "jwt"
 
 gem "active_model_serializers", "~> 0.10.0"
+
+gem "twilio-ruby", "~> 5.57.1"
