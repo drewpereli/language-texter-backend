@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  skip_before_action :ensure_authenticated
+  skip_before_action :ensure_authenticated, only: %i[login]
+
+  def index
+    @users = User.all
+
+    render json: @users
+  end
 
   def login
     @user = User.find_by(username: login_params[:username])
