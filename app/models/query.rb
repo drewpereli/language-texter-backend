@@ -5,4 +5,6 @@ class Query < ApplicationRecord
 
   belongs_to :challenge
   belongs_to :user
+
+  has_many :attempts
 end
