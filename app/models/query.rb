@@ -24,6 +24,14 @@ class Query < ApplicationRecord
     end
   end
 
+  def correct_text
+    if language == "spanish"
+      challenge.english_text
+    else
+      challenge.spanish_text
+    end
+  end
+
   def twilio_client
     @twilio_client ||= TwilioClient.new
   end
