@@ -9,6 +9,23 @@ class UsersController < ApplicationController
     render json: @users
   end
 
+  def change_password
+    @user = current_user
+
+    if @user.authenticate(change_password_params[:old_password])
+      @user.update(password: change_password_params[:new_password],
+                   password_confirmation: change_password_params[:new_password_confirmation])
+
+      if @user.valid?
+        head :no_content
+      else
+        render json: {errors: "New password doesn't match new password confirmation"}, status: :unauthorized
+      end
+    else
+      render json: {errors: "Old password incorrect"}, status: :unauthorized
+    end
+  end
+
   def login
     @user = User.find_by(username: login_params[:username])
 
@@ -24,5 +41,9 @@ class UsersController < ApplicationController
 
   def login_params
     params.permit(:username, :password)
+  end
+
+  def change_password_params
+    params.permit(:old_password, :new_password, :new_password_confirmation)
   end
 end

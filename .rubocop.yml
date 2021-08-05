@@ -46,3 +46,6 @@ RSpec/ExampleLength:
 
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
+
+Metrics/MethodLength:
+  Max: 50
