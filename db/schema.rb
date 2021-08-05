@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_02_062228) do
+ActiveRecord::Schema.define(version: 2021_08_05_024300) do
 
   create_table "challenges", force: :cascade do |t|
     t.string "spanish_text", null: false
@@ -21,6 +21,16 @@ ActiveRecord::Schema.define(version: 2021_08_02_062228) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_challenges_on_user_id"
+  end
+
+  create_table "queries", force: :cascade do |t|
+    t.integer "language", null: false
+    t.integer "user_id", null: false
+    t.integer "challenge_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["challenge_id"], name: "index_queries_on_challenge_id"
+    t.index ["user_id"], name: "index_queries_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
