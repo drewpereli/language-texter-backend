@@ -6,5 +6,25 @@ class Query < ApplicationRecord
   belongs_to :challenge
   belongs_to :user
 
-  has_many :attempts
+  has_one :attempt
+
+  def send_message
+    twilio_client.text_number(user.phone_number, message)
+  end
+
+  def resend_message
+    twilio_client.text_number(user.phone_number, "Respond you americano ignorante. #{message}")
+  end
+
+  def message
+    if language == "spanish"
+      "What does '#{challenge.spanish_text}' mean?"
+    else
+      "How do you say '#{challenge.english_text}' in spanish?"
+    end
+  end
+
+  def twilio_client
+    @twilio_client ||= TwilioClient.new
+  end
 end
