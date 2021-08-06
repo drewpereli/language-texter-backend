@@ -23,7 +23,11 @@ class Inquisitor
     end
 
     def random_language
-      %w[spanish english].sample
+      if rand < 0.66
+        "english"
+      else
+        "spanish"
+      end
     end
 
     def random_incomplete_challenge_not_last
