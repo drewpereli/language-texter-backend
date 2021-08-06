@@ -6,7 +6,7 @@ class Query < ApplicationRecord
   belongs_to :challenge
   belongs_to :user
 
-  has_one :attempt
+  has_one :attempt, dependent: :destroy
 
   def send_message
     twilio_client.text_number(user.phone_number, message)

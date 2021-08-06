@@ -3,7 +3,7 @@
 class Challenge < ApplicationRecord
   belongs_to :user
 
-  has_many :queries
+  has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
 
   scope :incomplete, -> { where(is_complete: false) }
