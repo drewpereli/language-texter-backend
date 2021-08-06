@@ -20,9 +20,9 @@ class Query < ApplicationRecord
 
   def message
     if language == "spanish"
-      "What does '#{challenge.spanish_text}' mean?"
+      "What does '#{challenge.spanish_text.strip}' mean?"
     else
-      "How do you say '#{challenge.english_text}' in spanish?"
+      "How do you say '#{challenge.english_text.strip}' in spanish?"
     end
   end
 
