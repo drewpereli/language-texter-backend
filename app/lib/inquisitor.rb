@@ -31,7 +31,9 @@ class Inquisitor
 
       seconds_since_last_query = current_time - last_query.created_at.in_time_zone("US/Pacific")
 
-      !last_query || seconds_since_last_query > 3600
+      return true if last_query.attempt.nil? && seconds_since_last_query > 3600
+
+      rand > 0.99
     end
 
     def current_time
