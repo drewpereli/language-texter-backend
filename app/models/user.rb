@@ -9,7 +9,7 @@ class User < ApplicationRecord
   has_many :challenges
 
   def token
-    JWT.encode({user_id: id}, Rails.application.secrets.secret_key_base)
+    JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
 
   def text(message)
