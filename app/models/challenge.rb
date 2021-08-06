@@ -21,4 +21,8 @@ class Challenge < ApplicationRecord
 
     count
   end
+
+  def streak_enough_for_completion?
+    current_streak >= required_streak_for_completion
+  end
 end
