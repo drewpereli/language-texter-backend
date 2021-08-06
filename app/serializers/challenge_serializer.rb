@@ -7,5 +7,6 @@ class ChallengeSerializer < ActiveModel::Serializer
              :required_streak_for_completion,
              :is_complete,
              :created_at,
-             :user_id
+             :user_id,
+             :current_streak # I know this is an N+1 query...
 end

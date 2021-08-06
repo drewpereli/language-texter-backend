@@ -4,15 +4,16 @@ class Challenge < ApplicationRecord
   belongs_to :user
 
   has_many :queries
+  has_many :attempts, through: :queries
 
   scope :incomplete, -> { where(is_complete: false) }
 
-  def streak_count
-    attempts = Attempt.joins(:query).where(queries: {challenge: self}).order("attempts.created_at DESC").limit(required_streak_for_completion)
+  def current_streak
+    recent_attempts = attempts.order("attempts.created_at DESC").limit(required_streak_for_completion)
 
     count = 0
 
-    attempts.each do |attempt|
+    recent_attempts.each do |attempt|
       break unless attempt.correct?
 
       count += 1

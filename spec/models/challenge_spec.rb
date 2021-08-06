@@ -3,8 +3,8 @@
 require "rails_helper"
 
 RSpec.describe Challenge, type: :model do
-  describe "#streak_count" do
-    subject(:streak_count) { challenge.streak_count }
+  describe "#current_streak" do
+    subject(:current_streak) { challenge.current_streak }
 
     let(:u1) { create(:user, username: "u1", phone_number: "abc") }
     let(:u2) { create(:user, username: "u2", phone_number: "def") }
@@ -89,7 +89,7 @@ RSpec.describe Challenge, type: :model do
       end
 
       it "is the count of all the correct answers since the last incorrect answer" do
-        expect(streak_count).to be(3)
+        expect(current_streak).to be(3)
       end
     end
   end

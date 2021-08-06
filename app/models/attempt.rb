@@ -13,10 +13,10 @@ class Attempt < ApplicationRecord
 
   def response_message
     if correct?
-      streak_count = last_query.challenge.streak_count
-      required_streak = last_query.challenge.required_streak_for_completion
+      current_streak = query.challenge.current_streak
+      required_streak = query.challenge.required_streak_for_completion
 
-      correct_attempts_still_required = [0, required_streak - streak_count].max
+      correct_attempts_still_required = [0, required_streak - current_streak].max
 
       case correct_attempts_still_required
       when 0
@@ -29,7 +29,7 @@ class Attempt < ApplicationRecord
       end
 
     else
-      "Estas equivocado, idiota. The correct answer is '#{last_query.correct_text}'."
+      "Estas equivocado, idiota. The correct answer is '#{query.correct_text}'."
     end
   end
 end
