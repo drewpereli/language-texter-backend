@@ -10,15 +10,27 @@ class Inquisitor
     def send_query
       if last_query.nil? || last_query.attempt
         # create a new query
-        challenge = Challenge.incomplete.sample
-        user = User.find_by(username: "drew")
-        language = %w[spanish english].sample
-
-        query = Query.create(challenge: challenge, user: user, language: language)
-
+        query = Query.create(challenge: random_incomplete_challenge_not_last, user: user_drew,
+                             language: random_language)
         query.send_message
       else
         last_query.resend_message
+      end
+    end
+
+    def user_drew
+      User.find_by(username: "drew")
+    end
+
+    def random_language
+      %w[spanish english].sample
+    end
+
+    def random_incomplete_challenge_not_last
+      if last_query.nil?
+        Challenge.incomplete.sample
+      else
+        Challenge.incomplete.where.not(id: last_query.challenge_id).sample
       end
     end
 
