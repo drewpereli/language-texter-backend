@@ -29,7 +29,7 @@ class Inquisitor
 
       return true if last_query.nil?
 
-      seconds_since_last_query = current_time - last_query.created_at.in_time_zone("US/Pacific")
+      seconds_since_last_query = current_time - last_query.last_sent_at.in_time_zone("US/Pacific")
 
       return true if last_query.attempt.nil? && seconds_since_last_query > 3600
 

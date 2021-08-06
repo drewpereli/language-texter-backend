@@ -10,10 +10,12 @@ class Query < ApplicationRecord
 
   def send_message
     twilio_client.text_number(user.phone_number, message)
+    update(last_sent_at: Time.now)
   end
 
   def resend_message
     twilio_client.text_number(user.phone_number, "Respond you americano ignorante. #{message}")
+    update(last_sent_at: Time.now)
   end
 
   def message
