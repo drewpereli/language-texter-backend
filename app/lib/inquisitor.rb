@@ -45,7 +45,7 @@ class Inquisitor
 
       return true if last_query.attempt.nil? && seconds_since_last_query > 3600
 
-      rand > 0.9
+      rand < 0.1
     end
 
     def current_time
