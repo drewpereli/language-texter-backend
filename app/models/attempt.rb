@@ -3,6 +3,8 @@
 class Attempt < ApplicationRecord
   belongs_to :query
 
+  scope :for_challenge, ->(challenge) { joins(:query).where(queries: {challenge: challenge}) }
+
   def correct?
     raw_text_text = query.language == "spanish" ? query.challenge.english_text : query.challenge.spanish_text
     test_text = raw_text_text.downcase.strip

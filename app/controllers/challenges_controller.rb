@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 class ChallengesController < ApplicationController
-  before_action :set_challenge, only: %i[update destroy]
+  before_action :set_challenge, only: %i[show update destroy]
+
+  # GET /challenges/1
+  def show
+    render json: @challenge
+  end
 
   # GET /challenges
   def index

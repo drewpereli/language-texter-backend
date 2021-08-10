@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  resources :attempts
-  resources :challenges, except: %i[show]
+  resources :attempts, only: %i[index]
+  resources :challenges
   resources :users, only: %i[index]
   post "/login", to: "users#login"
   post "/change_password", to: "users#change_password"
