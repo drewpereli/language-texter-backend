@@ -41,7 +41,7 @@ class Inquisitor
     def time_for_query?
       current_hour = current_time.strftime("%H").to_i
 
-      return false if current_hour < 8 || current_hour > 23
+      return false if current_hour < 8 || current_hour >= 23
 
       return true if last_query.nil?
 
