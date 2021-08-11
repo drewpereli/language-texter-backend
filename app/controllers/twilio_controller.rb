@@ -8,7 +8,7 @@ class TwilioController < ApplicationController
       r.message body: message
     end
 
-    last_query.challenge.update(complete: true) if last_query&.challenge&.streak_enough_for_completion?
+    last_query.challenge.update(is_complete: true) if last_query&.challenge&.streak_enough_for_completion?
 
     render xml: response.to_s
   end
