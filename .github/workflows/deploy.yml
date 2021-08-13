@@ -1,0 +1,31 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            source /etc/profile.d/rvm.sh
+            export RAILS_ENV=production
+            cd ${{ secrets.REMOTE_DIR }}
+            git fetch
+            git reset --hard origin/main
+            bundle install
+            bundle exec rails db:migrate
+            cat tmp/pids/server.pid | xargs kill -9
+            bundle exec rails server -d
+            bundle exec whenever --update-crontab
+            echo "Deployment complete"
