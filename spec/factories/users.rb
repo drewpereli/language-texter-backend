@@ -12,6 +12,5 @@ FactoryBot.define do
 
     password { "my-password" }
     password_confirmation { "my-password" }
-    password_digest { "my-password-digest" }
   end
 end
