@@ -25,4 +25,12 @@ class Challenge < ApplicationRecord
   def streak_enough_for_completion?
     current_streak >= required_streak_for_completion
   end
+
+  def mark_as_complete
+    update(is_complete: true)
+
+    christina = User.find_by(username: "christina")
+
+    christina&.text("Drew has completed the challenge \"#{spanish_text}\"!")
+  end
 end
