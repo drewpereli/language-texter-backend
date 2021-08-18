@@ -5,12 +5,16 @@ class Attempt < ApplicationRecord
 
   scope :for_challenge, ->(challenge) { joins(:query).where(queries: {challenge: challenge}) }
 
-  def correct?
-    raw_text_text = query.language == "spanish" ? query.challenge.english_text : query.challenge.spanish_text
-    test_text = raw_text_text.downcase.strip
-    response_text = text.downcase.strip
+  DEFAULT_TOKENIZER_OPTIONS = {
+    expand_contractions: true,
+    remove_emoji: true,
+    clean: true,
+    downcase: true,
+    punctuation: :none
+  }.freeze
 
-    test_text == response_text
+  def correct?
+    challenge_test_text == response_test_text
   end
 
   def response_message
@@ -32,6 +36,32 @@ class Attempt < ApplicationRecord
 
     else
       "Estas equivocado, idiota. The correct answer is '#{query.correct_text}'."
+    end
+  end
+
+  def get_test_text(raw_text)
+    tokenizer.tokenize(raw_text).join(" ")
+  end
+
+  def challenge_test_text
+    get_test_text(query.correct_text)
+  end
+
+  def response_test_text
+    get_test_text(text)
+  end
+
+  def tokenizer
+    @tokenizer ||= PragmaticTokenizer::Tokenizer.new(
+      {language: response_language_abbreviation}.merge(DEFAULT_TOKENIZER_OPTIONS)
+    )
+  end
+
+  def response_language_abbreviation
+    if query.response_language == "spanish"
+      :es
+    else
+      :en
     end
   end
 end
