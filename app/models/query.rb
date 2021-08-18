@@ -27,7 +27,7 @@ class Query < ApplicationRecord
   end
 
   def correct_text
-    if language == "spanish"
+    if response_language == "english"
       challenge.english_text
     else
       challenge.spanish_text
@@ -36,5 +36,13 @@ class Query < ApplicationRecord
 
   def twilio_client
     @twilio_client ||= TwilioClient.new
+  end
+
+  def response_language
+    if language == "spanish"
+      "english"
+    else
+      "spanish"
+    end
   end
 end
