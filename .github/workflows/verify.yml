@@ -1,0 +1,44 @@
+env:
+  RAILS_ENV: test
+
+name: Verify
+on: [push]
+
+jobs:
+  linters:
+    name: Linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.8
+          bundler-cache: true
+      - name: Run linters
+        run: bundle exec rubocop --parallel --config .rubocop.yml
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.8
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.8
+          bundler-cache: true
+      - name: Setup test database
+        run: |
+          bundle exec rake db:create
+          bundle exec rake db:schema:load
+      - name: Run tests
+        run: bundle exec rspec
