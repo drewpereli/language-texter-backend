@@ -2,8 +2,14 @@
 
 FactoryBot.define do
   factory :user do
-    username { "luther_manhole" }
-    phone_number { "1234567890" }
+    sequence :username do |n|
+      "luther_manhole-#{n}"
+    end
+
+    sequence :phone_number do |n|
+      "+1#{n.to_s.rjust(9, "0")}"
+    end
+
     password { "my-password" }
     password_confirmation { "my-password" }
     password_digest { "my-password-digest" }
