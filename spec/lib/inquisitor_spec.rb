@@ -6,12 +6,17 @@ RSpec.describe Inquisitor do
   describe ".time_for_query?" do
     subject { described_class.time_for_query? }
 
-    let(:time_now) { Time.new(2000, 1, 1, hour_now, minute_now, 0) }
+    let(:time_now) { Time.find_zone("US/Pacific").local(2000, 1, 1, hour_now, minute_now, 0) }
     let(:hour_now) { 12 }
     let(:minute_now) { 0 }
 
     before do
       allow(Time).to receive(:now).and_return(time_now)
+    end
+
+    it "works" do
+      expect(Time.now.strftime("%H").to_i).to be 12
+      expect(Time.now.strftime("%M").to_i).to be 0
     end
 
     context "when it's before 8 AM" do
