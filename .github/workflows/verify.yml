@@ -31,14 +31,12 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.6.8
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6.8
           bundler-cache: true
+
       - name: Setup test database
         run: |
           bundle exec rake db:create
           bundle exec rake db:schema:load
+          
       - name: Run tests
         run: bundle exec rspec
