@@ -40,7 +40,7 @@ class Challenge < ApplicationRecord
     def complete_and_process(challenge)
       challenge.mark_as_complete
       
-      first_in_queue.active! if need_more_active?
+      first_in_queue&.active! if need_more_active?
     end
   
     def initialize_and_process(attrs)

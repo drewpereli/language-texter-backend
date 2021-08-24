@@ -113,4 +113,61 @@ RSpec.describe Challenge, type: :model do
       expect(challenge.complete?).to be_truthy
     end
   end
+
+  describe ".complete_and_process" do
+    subject(:complete_and_process) { Challenge.complete_and_process(challenge) }
+
+    let(:challenge) { create(:challenge) }
+    
+    shared_examples "it marks the challenge as complete" do
+      it "marks the challenge as complete" do
+        complete_and_process
+
+        challenge.reload
+
+        expect(challenge.complete?).to be_truthy
+      end
+    end
+    
+    context "when we need more active challenges but there are none in the queue" do
+      include_examples "it marks the challenge as complete"
+    end
+
+    context "when we need more active challenges and there are some in the queue" do
+      before do
+        create_list(:challenge, 5, status: :queued)
+      end
+      
+      include_examples "it marks the challenge as complete"
+
+      it "makes first_in_que active" do
+        first_in_queue_before = Challenge.first_in_queue
+
+        complete_and_process
+
+        first_in_queue_before.reload
+
+        expect(first_in_queue_before.active?).to be_truthy
+      end
+    end
+
+    context "when we don't need more active" do
+      before do
+        create_list(:challenge, Challenge::MAX_ACTIVE + 1, status: :active)
+        create_list(:challenge, 5, status: :queued)
+      end
+
+      include_examples "it marks the challenge as complete"
+
+      it "does not make first_in_que active" do
+        first_in_queue_before = Challenge.first_in_queue
+
+        complete_and_process
+
+        first_in_queue_before.reload
+
+        expect(first_in_queue_before.active?).to be_falsey
+      end
+    end
+  end
 end
