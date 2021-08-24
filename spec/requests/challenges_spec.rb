@@ -10,14 +10,14 @@ RSpec.describe "Challenges", type: :request do
   let(:parsed_body) { JSON.parse(response.body) }
 
   describe "GET index" do
-    subject(:get_index) { get "/challenges", headers: authenticated_headers }
+    subject(:get_index) { get "/challenges", params: {status: "queued"}, headers: authenticated_headers }
 
     let(:response_ids) do
       parsed_body["challenges"].map { |record| record["id"] }
     end
 
     before do
-      create_list(:challenge, 10)
+      create_list(:challenge, 10, status: :queued)
     end
 
     it "responds with the Challenge records " do
