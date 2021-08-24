@@ -10,7 +10,9 @@ class ChallengesController < ApplicationController
 
   # GET /challenges
   def index
-    @challenges = Challenge.all
+    return render json: {errors: "must specify a status"} unless params[:status]
+
+    @challenges = Challenge.where(status: params[:status])
 
     render json: @challenges
   end
