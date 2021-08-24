@@ -32,9 +32,9 @@ class Inquisitor
 
     def random_incomplete_challenge_not_last
       if last_query.nil?
-        Challenge.incomplete.sample
+        Challenge.active.sample
       else
-        Challenge.incomplete.where.not(id: last_query.challenge_id).sample
+        Challenge.active.where.not(id: last_query.challenge_id).sample
       end
     end
 

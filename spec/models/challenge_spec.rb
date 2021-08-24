@@ -93,4 +93,24 @@ RSpec.describe Challenge, type: :model do
       end
     end
   end
+
+  describe "#mark_as_complete" do
+    subject(:mark_as_complete) { challenge.mark_as_complete }
+
+    let(:challenge) { create(:challenge) }
+
+    before do
+      create(:user, username: "christina", phone_number: "+18888888888")
+    end
+    
+    it "updates the challenge status and texts christina" do
+      expect_any_instance_of(User).to receive(:text).with("Drew has completed the challenge \"#{challenge.spanish_text}\"!").and_return(nil)
+      
+      mark_as_complete
+      
+      challenge.reload
+
+      expect(challenge.complete?).to be_truthy
+    end
+  end
 end

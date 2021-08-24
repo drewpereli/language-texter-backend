@@ -54,8 +54,7 @@ class ChallengesController < ApplicationController
     params.require(:challenge).permit(
       :spanish_text,
       :english_text,
-      :required_streak_for_completion,
-      :is_complete
+      :required_streak_for_completion
     )
   end
 end

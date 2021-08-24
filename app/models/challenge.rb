@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class Challenge < ApplicationRecord
+  enum status: %i[queued active complete]
+  
   belongs_to :user
 
   has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
-
-  scope :incomplete, -> { where(is_complete: false) }
 
   def current_streak
     recent_attempts = attempts.order("attempts.created_at DESC").limit(required_streak_for_completion)
@@ -27,7 +27,7 @@ class Challenge < ApplicationRecord
   end
 
   def mark_as_complete
-    update(is_complete: true)
+    complete!
 
     christina = User.find_by(username: "christina")
 
