@@ -102,33 +102,39 @@ RSpec.describe Challenge, type: :model do
     before do
       create(:user, username: "christina", phone_number: "+18888888888")
     end
-    
+
     it "updates the challenge status and texts christina" do
-      expect_any_instance_of(User).to receive(:text).with("Drew has completed the challenge \"#{challenge.spanish_text}\"!").and_return(nil)
-      
+      # rubocop:disable RSpec/AnyInstance
+      # rubocop:disable RSpec/StubbedMock
+      expect_any_instance_of(User).to receive(:text)
+        .with("Drew has completed the challenge \"#{challenge.spanish_text}\"!")
+        .and_return(nil)
+      # rubocop:enable RSpec/AnyInstance
+      # rubocop:enable RSpec/StubbedMock
+
       mark_as_complete
-      
+
       challenge.reload
 
-      expect(challenge.complete?).to be_truthy
+      expect(challenge).to be_complete
     end
   end
 
   describe ".complete_and_process" do
-    subject(:complete_and_process) { Challenge.complete_and_process(challenge) }
+    subject(:complete_and_process) { described_class.complete_and_process(challenge) }
 
     let(:challenge) { create(:challenge) }
-    
+
     shared_examples "it marks the challenge as complete" do
       it "marks the challenge as complete" do
         complete_and_process
 
         challenge.reload
 
-        expect(challenge.complete?).to be_truthy
+        expect(challenge).to be_complete
       end
     end
-    
+
     context "when we need more active challenges but there are none in the queue" do
       include_examples "it marks the challenge as complete"
     end
@@ -137,17 +143,17 @@ RSpec.describe Challenge, type: :model do
       before do
         create_list(:challenge, 5, status: :queued)
       end
-      
+
       include_examples "it marks the challenge as complete"
 
       it "makes first_in_que active" do
-        first_in_queue_before = Challenge.first_in_queue
+        first_in_queue_before = described_class.first_in_queue
 
         complete_and_process
 
         first_in_queue_before.reload
 
-        expect(first_in_queue_before.active?).to be_truthy
+        expect(first_in_queue_before).to be_active
       end
     end
 
@@ -160,13 +166,13 @@ RSpec.describe Challenge, type: :model do
       include_examples "it marks the challenge as complete"
 
       it "does not make first_in_que active" do
-        first_in_queue_before = Challenge.first_in_queue
+        first_in_queue_before = described_class.first_in_queue
 
         complete_and_process
 
         first_in_queue_before.reload
 
-        expect(first_in_queue_before.active?).to be_falsey
+        expect(first_in_queue_before).not_to be_active
       end
     end
   end

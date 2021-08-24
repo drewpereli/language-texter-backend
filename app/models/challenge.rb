@@ -2,7 +2,7 @@
 
 class Challenge < ApplicationRecord
   enum status: %i[queued active complete]
-  
+
   belongs_to :user
 
   has_many :queries, dependent: :destroy
@@ -39,20 +39,20 @@ class Challenge < ApplicationRecord
   class << self
     def complete_and_process(challenge)
       challenge.mark_as_complete
-      
+
       first_in_queue&.active! if need_more_active?
     end
-  
+
     def initialize_and_process(attrs)
       new(attrs).tap do |challenge|
         challenge.status = :active if need_more_active?
       end
     end
-  
+
     def need_more_active?
       active.count < MAX_ACTIVE
     end
-  
+
     def first_in_queue
       queued.first
     end
