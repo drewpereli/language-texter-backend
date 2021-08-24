@@ -8,6 +8,8 @@ class Challenge < ApplicationRecord
   has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
 
+  MAX_ACTIVE = 10
+
   def current_streak
     recent_attempts = attempts.order("attempts.created_at DESC").limit(required_streak_for_completion)
 
@@ -32,5 +34,27 @@ class Challenge < ApplicationRecord
     christina = User.find_by(username: "christina")
 
     christina&.text("Drew has completed the challenge \"#{spanish_text}\"!")
+  end
+
+  class << self
+    def complete_and_process(challenge)
+      challenge.mark_as_complete
+      
+      first_in_queue.active! if need_more_active?
+    end
+  
+    def initialize_and_process(attrs)
+      new(attrs).tap do |challenge|
+        challenge.status = :active if need_more_active?
+      end
+    end
+  
+    def need_more_active?
+      active.count < MAX_ACTIVE
+    end
+  
+    def first_in_queue
+      queued.first
+    end
   end
 end
