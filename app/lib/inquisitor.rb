@@ -55,7 +55,7 @@ class Inquisitor
     end
 
     def appropriate_time_for_text?
-      current_hour >= 8 && current_hour < 11
+      current_hour >= 8 && current_hour < 23
     end
 
     def current_hour
