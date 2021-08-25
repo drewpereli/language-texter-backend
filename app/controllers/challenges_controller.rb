@@ -19,9 +19,9 @@ class ChallengesController < ApplicationController
 
   # POST /challenges
   def create
-    @challenge = Challenge.initialize_and_process(challenge_params.merge(user: current_user))
+    @challenge = Challenge.create_and_process(challenge_params.merge(user: current_user))
 
-    if @challenge.save
+    if @challenge.valid?
       render json: @challenge
     else
       render json: @challenge.errors, status: :unprocessable_entity

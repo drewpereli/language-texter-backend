@@ -43,9 +43,11 @@ class Challenge < ApplicationRecord
       first_in_queue&.active! if need_more_active?
     end
 
-    def initialize_and_process(attrs)
-      new(attrs).tap do |challenge|
+    def create_and_process(attrs)
+      create(attrs).tap do |challenge|
         challenge.status = :active if need_more_active?
+
+        User.drew.text("New challenged added! '#{spanish_text}' / '#{english_text}'.") if challenge.valid?
       end
     end
 

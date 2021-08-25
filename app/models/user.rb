@@ -19,4 +19,8 @@ class User < ApplicationRecord
   def twilio_client
     @twilio_client ||= TwilioClient.new
   end
+
+  def self.drew
+    find_by(username: "drew")
+  end
 end

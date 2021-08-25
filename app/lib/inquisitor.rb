@@ -21,7 +21,7 @@ class Inquisitor
                     random_active_challenge_not_last
                   end
 
-      query = Query.create(challenge: challenge, user: user_drew, language: random_language)
+      query = Query.create(challenge: challenge, user: User.drew, language: random_language)
 
       query.send_message
     end
@@ -36,10 +36,6 @@ class Inquisitor
 
     def random_active_challenge_not_last
       Challenge.active.where.not(id: last_query&.challenge_id).sample
-    end
-
-    def user_drew
-      User.find_by(username: "drew")
     end
 
     def random_language
