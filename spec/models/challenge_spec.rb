@@ -176,4 +176,79 @@ RSpec.describe Challenge, type: :model do
       end
     end
   end
+
+  describe ".create_and_process", focus: true do
+    subject(:create_and_process) { described_class.create_and_process(attrs) }
+
+    let(:user) { create(:user, username: "drew") }
+
+    let(:attrs) do
+      {spanish_text: "foo", english_text: "bar", user: user}
+    end
+
+    before do
+      allow_any_instance_of(User).to receive(:text).and_return(nil)
+    end
+
+    context "when attrs are all valid" do  
+      it "creates a challenge" do
+        expect { create_and_process }.to change(Challenge, :count).by(1)
+      end
+
+      it "texts drew" do
+        expect_any_instance_of(User).to receive(:text)
+        create_and_process
+      end
+    end
+
+    context "when english text and spanish text has extra spaces" do
+      let(:attrs) do
+        {spanish_text: "  foo    ", english_text: "  bar    ", user: user}
+      end
+
+      it "strips them" do
+        challenge = create_and_process
+
+        expect(challenge.spanish_text).to eql("foo")
+        expect(challenge.english_text).to eql("bar")
+      end
+    end
+
+    context "when active challenges aren't maxed out" do
+      it "sets the challenge to active" do
+        expect(create_and_process).to be_active
+      end
+    end
+
+    context "when active challenges aren't maxed out" do
+      it "sets the challenge to active" do
+        expect(create_and_process).to be_active
+      end
+    end
+
+    context "when active challenges are maxed out" do
+      before do
+        create_list(:challenge, described_class::MAX_ACTIVE, status: :active)
+      end
+      
+      it "sets the challenge to queued" do
+        expect(create_and_process).to be_queued
+      end
+    end
+
+    context "when attrs are invalid" do
+      let(:attrs) do
+        {spanish_text: nil, english_text: "bar", user: user}
+      end
+
+      it "doesn't create a challenge" do
+        expect { create_and_process }.to change(Challenge, :count).by(0)
+      end
+
+      it "doesn't text drew" do
+        expect_any_instance_of(User).to_not receive(:text)
+        create_and_process
+      end
+    end
+  end
 end

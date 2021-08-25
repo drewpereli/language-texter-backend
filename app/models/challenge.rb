@@ -8,6 +8,8 @@ class Challenge < ApplicationRecord
   has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
 
+  validates :spanish_text, :english_text, :user, presence: true
+
   MAX_ACTIVE = 10
 
   def current_streak
@@ -44,10 +46,13 @@ class Challenge < ApplicationRecord
     end
 
     def create_and_process(attrs)
+      attrs[:spanish_text] = attrs[:spanish_text]&.strip
+      attrs[:english_text] = attrs[:english_text]&.strip
+
       create(attrs).tap do |challenge|
         challenge.status = :active if need_more_active?
 
-        User.drew.text("New challenged added! '#{spanish_text}' / '#{english_text}'.") if challenge.valid?
+        User.drew.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.") if challenge.valid?
       end
     end
 
