@@ -27,7 +27,7 @@ class Inquisitor
     end
 
     def send_reminder_if_time
-      last_query.resend_message if time_since_last_sent >= 1.hour
+      last_query.resend_message if last_query.time_since_last_sent >= 1.hour
     end
 
     def random_complete_challenge
