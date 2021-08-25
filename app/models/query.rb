@@ -45,4 +45,8 @@ class Query < ApplicationRecord
       "spanish"
     end
   end
+
+  def time_since_last_sent
+    Time.now - last_sent_at
+  end
 end
