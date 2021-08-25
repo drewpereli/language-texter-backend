@@ -48,6 +48,11 @@ RSpec.describe "Challenges", type: :request do
       }
     end
 
+    before do
+      allow(User).to receive(:drew).and_return(user)
+      allow(user).to receive(:text).and_return(nil)
+    end
+
     it "creates a new Challenge" do
       expect { post_create }.to change(Challenge, :count).by(1)
     end
