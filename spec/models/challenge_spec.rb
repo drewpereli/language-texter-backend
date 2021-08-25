@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/AnyInstance
+# rubocop:disable RSpec/StubbedMock
+
 require "rails_helper"
 
 RSpec.describe Challenge, type: :model do
@@ -104,13 +107,9 @@ RSpec.describe Challenge, type: :model do
     end
 
     it "updates the challenge status and texts christina" do
-      # rubocop:disable RSpec/AnyInstance
-      # rubocop:disable RSpec/StubbedMock
       expect_any_instance_of(User).to receive(:text)
         .with("Drew has completed the challenge \"#{challenge.spanish_text}\"!")
         .and_return(nil)
-      # rubocop:enable RSpec/AnyInstance
-      # rubocop:enable RSpec/StubbedMock
 
       mark_as_complete
 
@@ -177,7 +176,7 @@ RSpec.describe Challenge, type: :model do
     end
   end
 
-  describe ".create_and_process", focus: true do
+  describe ".create_and_process" do
     subject(:create_and_process) { described_class.create_and_process(attrs) }
 
     let(:user) { create(:user, username: "drew") }
@@ -190,9 +189,9 @@ RSpec.describe Challenge, type: :model do
       allow_any_instance_of(User).to receive(:text).and_return(nil)
     end
 
-    context "when attrs are all valid" do  
+    context "when attrs are all valid" do
       it "creates a challenge" do
-        expect { create_and_process }.to change(Challenge, :count).by(1)
+        expect { create_and_process }.to change(described_class, :count).by(1)
       end
 
       it "texts drew" do
@@ -220,17 +219,11 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when active challenges aren't maxed out" do
-      it "sets the challenge to active" do
-        expect(create_and_process).to be_active
-      end
-    end
-
     context "when active challenges are maxed out" do
       before do
         create_list(:challenge, described_class::MAX_ACTIVE, status: :active)
       end
-      
+
       it "sets the challenge to queued" do
         expect(create_and_process).to be_queued
       end
@@ -242,13 +235,16 @@ RSpec.describe Challenge, type: :model do
       end
 
       it "doesn't create a challenge" do
-        expect { create_and_process }.to change(Challenge, :count).by(0)
+        expect { create_and_process }.to change(described_class, :count).by(0)
       end
 
       it "doesn't text drew" do
-        expect_any_instance_of(User).to_not receive(:text)
+        expect_any_instance_of(User).not_to receive(:text)
         create_and_process
       end
     end
   end
 end
+
+# rubocop:enable RSpec/AnyInstance
+# rubocop:enable RSpec/StubbedMock
