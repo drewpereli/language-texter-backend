@@ -130,22 +130,6 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when active challenges aren't maxed out" do
-      it "sets the challenge to active" do
-        expect(create_and_process).to be_active
-      end
-    end
-
-    context "when active challenges are maxed out" do
-      before do
-        create_list(:challenge, described_class::MAX_ACTIVE, status: :active)
-      end
-
-      it "sets the challenge to queued" do
-        expect(create_and_process).to be_queued
-      end
-    end
-
     context "when attrs are invalid" do
       let(:attrs) do
         {spanish_text: nil, english_text: "bar", user: user}
@@ -158,6 +142,26 @@ RSpec.describe Challenge, type: :model do
       it "doesn't text drew" do
         expect_any_instance_of(User).not_to receive(:text)
         create_and_process
+      end
+    end
+
+    context "when there aren't enough active challenges" do
+      it "activates the challenge" do
+        challenge = create_and_process
+        challenge.reload
+        expect(challenge).to be_active
+      end
+    end
+
+    context "when there are enough active challenges" do
+      before do
+        create_list(:challenge, Challenge::MAX_ACTIVE, status: "active")
+      end
+
+      it "queues the challenge" do
+        challenge = create_and_process
+        challenge.reload
+        expect(challenge).to be_queued
       end
     end
   end

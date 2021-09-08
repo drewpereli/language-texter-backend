@@ -51,7 +51,7 @@ class Challenge < ApplicationRecord
       attrs[:english_text] = attrs[:english_text]&.strip
 
       create(attrs).tap do |challenge|
-        challenge.status = :active if need_more_active?
+        challenge.update(status: "active") if need_more_active?
 
         if challenge.valid?
           User.drew.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.")
