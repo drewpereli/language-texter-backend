@@ -13,10 +13,10 @@ class ChallengesController < ApplicationController
     return render json: {errors: "must specify a status"} unless params[:status]
 
     @challenges = Challenge
-                  .where(status: params[:status])
-                  .order(created_at: :desc)
-                  .page(params[:page])
-                  .per(params[:per_page])
+                    .where(status: params[:status])
+                    .order(created_at: :desc)
+                    .page(params[:page])
+                    .per(params[:per_page])
 
     render json: @challenges, meta: {total_pages: @challenges.total_pages}
   end

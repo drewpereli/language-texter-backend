@@ -65,3 +65,6 @@ Metrics/MethodLength:
 
 Naming/VariableNumber:
   Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented_relative_to_receiver

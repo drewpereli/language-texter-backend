@@ -53,8 +53,8 @@ RSpec.describe Challenge, type: :model do
 
     it "updates the challenge status and texts christina" do
       expect_any_instance_of(User).to receive(:text)
-        .with("Drew has completed the challenge \"#{challenge.spanish_text}\"!")
-        .and_return(nil)
+                                        .with("Drew has completed the challenge \"#{challenge.spanish_text}\"!")
+                                        .and_return(nil)
 
       mark_as_complete
 
