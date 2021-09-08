@@ -63,3 +63,5 @@ gem "twilio-ruby", "~> 5.57.1"
 gem "whenever", require: false
 
 gem "pragmatic_tokenizer"
+
+gem "kaminari"
