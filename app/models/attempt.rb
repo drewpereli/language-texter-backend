@@ -1,7 +1,17 @@
 # frozen_string_literal: true
 
 class Attempt < ApplicationRecord
+  enum result_status: [
+    :incorrect_active, # attempt was incorrect for an active challenge
+    :correct_active_insufficient, # attempt was correct for an active challenge, but more are needed for completion
+    :correct_active_sufficient, # attempt was correct for an active challenge, and the challenge is now complete
+    :incorrect_complete, # attempt was incorrect for an already-completed challenge
+    :correct_complete # attempt was correct for an already-complete challenge
+  ]
+
   belongs_to :query
+
+  has_one :challenge, through: :query
 
   scope :for_challenge, ->(challenge) { joins(:query).where(queries: {challenge: challenge}) }
 
@@ -18,24 +28,23 @@ class Attempt < ApplicationRecord
   end
 
   def response_message
-    if correct?
-      current_streak = query.challenge.current_streak
-      required_streak = query.challenge.required_streak_for_completion
-
-      correct_attempts_still_required = [0, required_streak - current_streak].max
-
-      case correct_attempts_still_required
-      when 0
-        "Good job, that's correct! You've completed this challenge!"
-      when 1
+    case result_status
+    when "incorrect_active"
+      "Estas equivocado, idiota. The correct answer is '#{query.correct_text}'."
+    when "correct_active_insufficient"
+      if challenge.correct_attempts_still_required == 1
         "Good job, that's correct! You only need 1 more correct guess to complete this challenge!"
       else
         "Good job, that's correct! " \
-          "#{correct_attempts_still_required} more correct guesses in a row needed to complete this challenge."
+            "#{challenge.correct_attempts_still_required} more correct guesses " \
+            "in a row needed to complete this challenge."
       end
-
-    else
-      "Estas equivocado, idiota. The correct answer is '#{query.correct_text}'."
+    when "correct_active_sufficient"
+      "Good job, that's correct! You've completed this challenge!"
+    when "incorrect_complete"
+      "That's incorrect. This challenge has been reactivated."
+    when "correct_complete"
+      "That's correct. Looks like you still know this one"
     end
   end
 
@@ -62,6 +71,31 @@ class Attempt < ApplicationRecord
       :es
     else
       :en
+    end
+  end
+
+  # runs before challenge status is updated
+  def compute_result_status
+    if correct?
+      if challenge.complete?
+        :correct_complete
+      elsif challenge.correct_attempts_still_required == 1
+        :correct_active_sufficient
+      else
+        :correct_active_insufficient
+      end
+    elsif challenge.complete?
+      :incorrect_complete
+    else
+      :incorrect_active
+    end
+  end
+
+  def self.create_and_process(attrs)
+    create(attrs).tap do |attempt|
+      attempt.update(result_status: attempt.compute_result_status)
+      User.drew.text(attempt.response_message)
+      attempt.challenge.process_attempt(attempt)
     end
   end
 end

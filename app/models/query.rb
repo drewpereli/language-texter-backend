@@ -49,4 +49,10 @@ class Query < ApplicationRecord
   def time_since_last_sent
     Time.now - last_sent_at
   end
+
+  def self.current_active
+    return nil if count.zero? || last.attempt.present?
+
+    last
+  end
 end

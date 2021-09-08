@@ -12,5 +12,9 @@ FactoryBot.define do
 
     password { "my-password" }
     password_confirmation { "my-password" }
+
+    trait :drew do
+      username { "drew" }
+    end
   end
 end

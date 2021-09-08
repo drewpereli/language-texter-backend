@@ -9,7 +9,7 @@ FactoryBot.define do
     end
 
     sequence :english_text do |n|
-      "my-spanish-text=#{n}"
+      "my-english-text=#{n}"
     end
   end
 end

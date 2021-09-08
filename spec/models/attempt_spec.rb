@@ -3,6 +3,33 @@
 require "rails_helper"
 
 RSpec.describe Attempt, type: :model do
+  describe ".create_and_process" do
+    subject(:create_and_process) { described_class.create_and_process(query: query, text: "abc") }
+
+    let(:query) { create(:query) }
+
+    before do
+      create(:user, :drew)
+      allow(Rails.application.credentials).to receive(:twilio).and_return({account_ssid: 123, auth_token: "abc"})
+      allow_any_instance_of(TwilioClient).to receive(:text_number).and_return(nil)
+    end
+
+    it "creates an attempt" do
+      expect { create_and_process }.to change(described_class, :count).by(1)
+    end
+
+    it "sets the attempt result status" do
+      attempt = create_and_process
+      expect(attempt.result_status).not_to be_nil
+      expect(attempt.result_status).to eql(attempt.compute_result_status.to_s)
+    end
+
+    it "calls process_attempt on the challenge" do
+      expect_any_instance_of(Challenge).to receive(:process_attempt).with(instance_of(described_class))
+      create_and_process
+    end
+  end
+
   describe "#correct?" do
     subject(:correct) { attempt.correct? }
 
@@ -73,6 +100,59 @@ RSpec.describe Attempt, type: :model do
       let(:attempt_text) { "What's your name?" }
 
       it { is_expected.to be_truthy }
+    end
+  end
+
+  describe "#compute_result_status" do
+    subject(:compute_result_status) { attempt.compute_result_status }
+
+    context "when attempt is correct" do
+      let(:attempt) { create(:attempt, :correct) }
+
+      context "when it's not the last attempt needed for an active challenge" do
+        before do
+          attempt.challenge.active!
+        end
+
+        it { is_expected.to be(:correct_active_insufficient) }
+      end
+
+      context "when it is the last attempt needed for an active challenge" do
+        before do
+          attempt.challenge.active!
+          attempt.challenge.update(current_streak: attempt.challenge.required_streak_for_completion - 1)
+        end
+
+        it { is_expected.to be(:correct_active_sufficient) }
+      end
+
+      context "when it's for an already-completed challenge" do
+        before do
+          attempt.challenge.complete!
+        end
+
+        it { is_expected.to be(:correct_complete) }
+      end
+    end
+
+    context "when attempt is incorrect" do
+      let(:attempt) { create(:attempt, :incorrect) }
+
+      context "when it's for an active challenge" do
+        before do
+          attempt.challenge.active!
+        end
+
+        it { is_expected.to be(:incorrect_active) }
+      end
+
+      context "when it's for an already-completed challenge" do
+        before do
+          attempt.challenge.complete!
+        end
+
+        it { is_expected.to be(:incorrect_complete) }
+      end
     end
   end
 end

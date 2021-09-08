@@ -8,5 +8,9 @@ FactoryBot.define do
     sequence :language do |n|
       n.even? ? "english" : "spanish"
     end
+
+    trait :expecting_english_response do
+      language { "spanish" }
+    end
   end
 end

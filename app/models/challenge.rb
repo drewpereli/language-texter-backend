@@ -12,39 +12,40 @@ class Challenge < ApplicationRecord
 
   MAX_ACTIVE = 10
 
-  def current_streak
-    recent_attempts = attempts.order("attempts.created_at DESC").limit(required_streak_for_completion)
-
-    count = 0
-
-    recent_attempts.each do |attempt|
-      break unless attempt.correct?
-
-      count += 1
-    end
-
-    count
-  end
-
   def streak_enough_for_completion?
     current_streak >= required_streak_for_completion
   end
 
+  def correct_attempts_still_required
+    [0, required_streak_for_completion - current_streak].max
+  end
+
   def mark_as_complete
     complete!
+
+    self.class.first_in_queue&.active! if self.class.need_more_active?
 
     christina = User.find_by(username: "christina")
 
     christina&.text("Drew has completed the challenge \"#{spanish_text}\"!")
   end
 
-  class << self
-    def complete_and_process(challenge)
-      challenge.mark_as_complete
-
-      first_in_queue&.active! if need_more_active?
+  def process_attempt(attempt)
+    case attempt.result_status
+    when "incorrect_active"
+      update(current_streak: 0)
+    when "correct_active_insufficient", "correct_complete"
+      increment!(:current_streak)
+    when "correct_active_sufficient"
+      increment!(:current_streak)
+      mark_as_complete
+    when "incorrect_complete"
+      update(current_streak: 0)
+      active!
     end
+  end
 
+  class << self
     def create_and_process(attrs)
       attrs[:spanish_text] = attrs[:spanish_text]&.strip
       attrs[:english_text] = attrs[:english_text]&.strip

@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_07_021810) do
+ActiveRecord::Schema.define(version: 2021_09_08_023453) do
 
   create_table "attempts", force: :cascade do |t|
     t.string "text", null: false
     t.integer "query_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "result_status"
     t.index ["query_id"], name: "index_attempts_on_query_id"
   end
 
@@ -28,6 +29,7 @@ ActiveRecord::Schema.define(version: 2021_09_07_021810) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "status", default: 0, null: false
+    t.integer "current_streak", default: 0, null: false
     t.index ["user_id"], name: "index_challenges_on_user_id"
   end
 

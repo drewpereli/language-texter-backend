@@ -1,99 +1,44 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/AnyInstance
-# rubocop:disable RSpec/StubbedMock
-
 require "rails_helper"
 
 RSpec.describe Challenge, type: :model do
-  describe "#current_streak" do
-    subject(:current_streak) { challenge.current_streak }
+  describe ".need_more_active?" do
+    subject(:need_more_active) { described_class.need_more_active? }
 
-    let(:u1) { create(:user, username: "u1", phone_number: "abc") }
-    let(:u2) { create(:user, username: "u2", phone_number: "def") }
-    let(:challenge) do
-      create(:challenge, spanish_text: "amigo", english_text: "friend", user: u1, required_streak_for_completion: 3)
-    end
-
-    context "when the user hasn't responded yet" do
-      it { is_expected.to be(0) }
-    end
-
-    context "when the user has respondent with some correct and some incorrect and the last one was incorrect" do
+    context "when the number of active challenges is greater than MAX_ACTIVE" do
       before do
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "asdfasdfasdf",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
+        create_list(:challenge, Challenge::MAX_ACTIVE + 10, status: "active")
       end
 
-      it { is_expected.to be(0) }
+      it { is_expected.to be_falsey }
     end
 
-    context "when the user has respondent with some correct and some incorrect and the last one was correct" do
+    context "when the number of active challenges is equal to MAX_ACTIVE" do
       before do
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "asdfasdfasdf",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
-
-        create(:attempt,
-               text: "amigo",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "english"))
-
-        create(:attempt,
-               text: "friend",
-               query: create(:query,
-                             challenge: challenge,
-                             user: u2,
-                             language: "spanish"))
+        create_list(:challenge, Challenge::MAX_ACTIVE, status: "active")
       end
 
-      it "is the count of all the correct answers since the last incorrect answer" do
-        expect(current_streak).to be(3)
+      it { is_expected.to be_falsey }
+    end
+
+    context "when the number of active challenges is less than MAX_ACTIVE" do
+      before do
+        create_list(:challenge, Challenge::MAX_ACTIVE - 1, status: "active")
       end
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe ".first_in_queue" do
+    subject(:first_in_queue) { described_class.first_in_queue }
+
+    let!(:first) { create(:challenge, status: "queued") }
+    let!(:second) { create(:challenge, status: "queued") }
+
+    it "returns the oldest item queued" do
+      expect(first_in_queue.id).to eql(first.id)
     end
   end
 
@@ -117,61 +62,33 @@ RSpec.describe Challenge, type: :model do
 
       expect(challenge).to be_complete
     end
-  end
 
-  describe ".complete_and_process" do
-    subject(:complete_and_process) { described_class.complete_and_process(challenge) }
+    context "when more challenges need to be activated" do
+      let!(:queued) { create(:challenge, status: "queued") }
 
-    let(:challenge) { create(:challenge) }
-
-    shared_examples "it marks the challenge as complete" do
-      it "marks the challenge as complete" do
-        complete_and_process
-
-        challenge.reload
-
-        expect(challenge).to be_complete
-      end
-    end
-
-    context "when we need more active challenges but there are none in the queue" do
-      include_examples "it marks the challenge as complete"
-    end
-
-    context "when we need more active challenges and there are some in the queue" do
       before do
-        create_list(:challenge, 5, status: :queued)
+        allow_any_instance_of(User).to receive(:text).and_return(nil)
       end
 
-      include_examples "it marks the challenge as complete"
-
-      it "makes first_in_que active" do
-        first_in_queue_before = described_class.first_in_queue
-
-        complete_and_process
-
-        first_in_queue_before.reload
-
-        expect(first_in_queue_before).to be_active
+      it "activates the last queued challenge" do
+        mark_as_complete
+        queued.reload
+        expect(queued).to be_active
       end
     end
 
-    context "when we don't need more active" do
+    context "when more challenges don't need to be activated" do
+      let!(:queued) { create(:challenge, status: "queued") }
+
       before do
-        create_list(:challenge, Challenge::MAX_ACTIVE + 1, status: :active)
-        create_list(:challenge, 5, status: :queued)
+        create_list(:challenge, Challenge::MAX_ACTIVE + 10, status: "active")
+        allow_any_instance_of(User).to receive(:text).and_return(nil)
       end
 
-      include_examples "it marks the challenge as complete"
-
-      it "does not make first_in_que active" do
-        first_in_queue_before = described_class.first_in_queue
-
-        complete_and_process
-
-        first_in_queue_before.reload
-
-        expect(first_in_queue_before).not_to be_active
+      it "does not activate the last queued challenge" do
+        mark_as_complete
+        queued.reload
+        expect(queued).to be_queued
       end
     end
   end
@@ -244,7 +161,77 @@ RSpec.describe Challenge, type: :model do
       end
     end
   end
-end
 
-# rubocop:enable RSpec/AnyInstance
-# rubocop:enable RSpec/StubbedMock
+  describe "#process_attempt" do
+    subject(:process_attempt) { challenge.process_attempt(attempt) }
+
+    let(:challenge) { create(:challenge) }
+
+    context "when attempt is 'incorrect_active'" do
+      let(:attempt) { create(:attempt, result_status: "incorrect_active", challenge: challenge) }
+
+      it "resets the current streak to 0" do
+        challenge.update(current_streak: 10)
+        process_attempt
+        challenge.reload
+        expect(challenge.current_streak).to be 0
+      end
+    end
+
+    context "when attempt is 'correct_active_insufficient'" do
+      let(:attempt) { create(:attempt, result_status: "correct_active_insufficient", challenge: challenge) }
+
+      it "increments the current streak" do
+        challenge.update(current_streak: 5)
+        process_attempt
+        challenge.reload
+        expect(challenge.current_streak).to be 6
+      end
+    end
+
+    context "when attempt is 'correct_active_sufficient'" do
+      let(:attempt) { create(:attempt, result_status: "correct_active_sufficient", challenge: challenge) }
+
+      it "increments the current streak" do
+        challenge.update(current_streak: 5)
+        process_attempt
+        challenge.reload
+        expect(challenge.current_streak).to be 6
+      end
+
+      it "calls #mark_as_complete on the challenge" do
+        expect(challenge).to receive(:mark_as_complete)
+        process_attempt
+      end
+    end
+
+    context "when attempt is 'incorrect_complete'" do
+      let(:attempt) { create(:attempt, result_status: "incorrect_complete", challenge: challenge) }
+
+      it "resets the current streak to 0" do
+        challenge.update(current_streak: 10)
+        process_attempt
+        challenge.reload
+        expect(challenge.current_streak).to be 0
+      end
+
+      it "reactivates the challenge" do
+        challenge.complete!
+        process_attempt
+        challenge.reload
+        expect(challenge).to be_active
+      end
+    end
+
+    context "when attempt is 'correct_complete'" do
+      let(:attempt) { create(:attempt, result_status: "correct_complete", challenge: challenge) }
+
+      it "increments the current streak" do
+        challenge.update(current_streak: 5)
+        process_attempt
+        challenge.reload
+        expect(challenge.current_streak).to be 6
+      end
+    end
+  end
+end
