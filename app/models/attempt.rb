@@ -94,8 +94,8 @@ class Attempt < ApplicationRecord
   def self.create_and_process(attrs)
     create(attrs).tap do |attempt|
       attempt.update(result_status: attempt.compute_result_status)
-      User.drew.text(attempt.response_message)
       attempt.challenge.process_attempt(attempt)
+      User.drew.text(attempt.response_message)
     end
   end
 end
