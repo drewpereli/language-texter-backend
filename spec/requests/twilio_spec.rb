@@ -99,14 +99,6 @@ RSpec.describe "Twilio", type: :request do
       end
     end
 
-    context "when there are no queries" do
-      let(:request_message) { "abc" }
-
-      it "does not create an attempt" do
-        expect { post_create }.to change(Attempt, :count).by(0)
-      end
-    end
-
     context "when the last query was already attempted" do
       let(:request_message) { "abc" }
 

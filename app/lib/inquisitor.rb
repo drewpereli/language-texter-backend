@@ -35,7 +35,7 @@ class Inquisitor
     end
 
     def random_active_challenge_not_last
-      Challenge.active.where.not(id: last_query&.challenge_id).sample
+      Challenge.active.where.not(id: last_query.challenge_id).sample
     end
 
     def random_language
@@ -47,7 +47,7 @@ class Inquisitor
     end
 
     def last_query_waiting_on_attempt?
-      last_query && last_query.attempt.nil?
+      last_query.attempt.nil?
     end
 
     def last_query

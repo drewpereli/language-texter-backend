@@ -51,7 +51,7 @@ class Query < ApplicationRecord
   end
 
   def self.current_active
-    return nil if count.zero? || last.attempt.present?
+    return nil if last.attempt.present?
 
     last
   end

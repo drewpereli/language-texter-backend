@@ -28,6 +28,7 @@ jobs:
             git reset --hard origin/main
             bundle install
             bundle exec rails db:migrate
+            bundle exec rails db:seed
             cat tmp/pids/server.pid | xargs kill -9
             bundle exec rails server -d
             bundle exec whenever --update-crontab
