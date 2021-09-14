@@ -19,11 +19,7 @@ class Query < ApplicationRecord
   end
 
   def message
-    if language == "spanish"
-      "What does '#{challenge.spanish_text.strip}' mean?"
-    else
-      "How do you say '#{challenge.english_text.strip}' in spanish?"
-    end
+    [message_challenge_portion, message_note_portion].compact.join(" ")
   end
 
   def correct_text
@@ -54,5 +50,23 @@ class Query < ApplicationRecord
     return nil if last.attempt.present?
 
     last
+  end
+
+  private
+
+  def message_challenge_portion
+    if spanish?
+      "What does '#{challenge.spanish_text.strip}' mean?"
+    else
+      "How do you say '#{challenge.english_text.strip}' in spanish?"
+    end
+  end
+
+  def message_note_portion
+    if spanish? && challenge.spanish_text_note.present?
+      "(Note: #{challenge.spanish_text_note})"
+    elsif english? && challenge.english_text_note.present?
+      "(Note: #{challenge.english_text_note})"
+    end
   end
 end

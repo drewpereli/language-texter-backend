@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_08_023453) do
+ActiveRecord::Schema.define(version: 2021_09_14_035103) do
 
   create_table "attempts", force: :cascade do |t|
     t.string "text", null: false
@@ -30,6 +30,8 @@ ActiveRecord::Schema.define(version: 2021_09_08_023453) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "status", default: 0, null: false
     t.integer "current_streak", default: 0, null: false
+    t.string "spanish_text_note"
+    t.string "english_text_note"
     t.index ["user_id"], name: "index_challenges_on_user_id"
   end
 
