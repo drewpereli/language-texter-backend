@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_14_052723) do
+ActiveRecord::Schema.define(version: 2021_09_14_053113) do
 
   create_table "attempts", force: :cascade do |t|
     t.string "text", null: false
@@ -49,7 +49,9 @@ ActiveRecord::Schema.define(version: 2021_09_14_052723) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "last_sent_at"
     t.boolean "for_already_completed_challenge", default: false, null: false
+    t.integer "phrase_id"
     t.index ["challenge_id"], name: "index_queries_on_challenge_id"
+    t.index ["phrase_id"], name: "index_queries_on_phrase_id"
     t.index ["user_id"], name: "index_queries_on_user_id"
   end
 

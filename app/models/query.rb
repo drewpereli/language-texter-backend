@@ -4,6 +4,7 @@ class Query < ApplicationRecord
   enum language: %i[spanish english]
 
   belongs_to :challenge
+  belongs_to :phrase
   belongs_to :user
 
   has_one :attempt, dependent: :destroy
