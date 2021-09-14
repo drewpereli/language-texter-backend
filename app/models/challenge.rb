@@ -5,6 +5,7 @@ class Challenge < ApplicationRecord
 
   belongs_to :user
 
+  has_many :phrases, dependent: :destroy  
   has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
 
