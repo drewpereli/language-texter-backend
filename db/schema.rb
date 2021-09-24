@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_14_035103) do
+ActiveRecord::Schema.define(version: 2021_09_24_035609) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -48,6 +48,8 @@ ActiveRecord::Schema.define(version: 2021_09_14_035103) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "confirmation_token"
+    t.boolean "confirmed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.string "password_digest", null: false
     t.string "phone_number", null: false
