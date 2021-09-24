@@ -13,46 +13,46 @@
 ActiveRecord::Schema.define(version: 2021_09_14_035103) do
 
   create_table "attempts", force: :cascade do |t|
-    t.string "text", null: false
-    t.integer "query_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.integer "query_id", null: false
     t.integer "result_status"
+    t.string "text", null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["query_id"], name: "index_attempts_on_query_id"
   end
 
   create_table "challenges", force: :cascade do |t|
-    t.string "spanish_text", null: false
-    t.string "english_text", null: false
-    t.integer "required_streak_for_completion", default: 20, null: false
-    t.integer "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.integer "status", default: 0, null: false
     t.integer "current_streak", default: 0, null: false
-    t.string "spanish_text_note"
+    t.string "english_text", null: false
     t.string "english_text_note"
+    t.integer "required_streak_for_completion", default: 20, null: false
+    t.string "spanish_text", null: false
+    t.string "spanish_text_note"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
     t.index ["user_id"], name: "index_challenges_on_user_id"
   end
 
   create_table "queries", force: :cascade do |t|
-    t.integer "language", null: false
-    t.integer "user_id", null: false
     t.integer "challenge_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "last_sent_at"
     t.boolean "for_already_completed_challenge", default: false, null: false
+    t.integer "language", default: 0, null: false
+    t.datetime "last_sent_at"
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
     t.index ["challenge_id"], name: "index_queries_on_challenge_id"
     t.index ["user_id"], name: "index_queries_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "username", null: false
-    t.string "phone_number", null: false
-    t.string "password_digest", null: false
     t.datetime "created_at", precision: 6, null: false
+    t.string "password_digest", null: false
+    t.string "phone_number", null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "username", null: false
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 

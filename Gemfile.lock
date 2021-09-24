@@ -104,6 +104,8 @@ GEM
     faraday-patron (1.0.0)
     faraday-rack (1.0.0)
     ffi (1.15.3)
+    fix-db-schema-conflicts (3.0.3)
+      rubocop (>= 0.38.0)
     formatador (0.2.5)
     globalid (0.5.1)
       activesupport (>= 5.0)
@@ -286,6 +288,7 @@ DEPENDENCIES
   bootsnap (>= 1.4.4)
   byebug
   factory_bot_rails
+  fix-db-schema-conflicts
   guard-rspec
   jwt
   kaminari

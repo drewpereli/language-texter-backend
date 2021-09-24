@@ -47,6 +47,7 @@ group :development, :test do
 end
 
 group :development do
+  gem "fix-db-schema-conflicts"
   gem "guard-rspec", require: false
   gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false
