@@ -2,8 +2,10 @@
 
 class User < ApplicationRecord
   has_secure_password
+  has_secure_token :confirmation_token
 
-  validates :username, :phone_number, :password, :password_confirmation, presence: true
+  validates :username, :phone_number, presence: true
+  validates :password, :password_confirmation, presence: true, on: :create
   validates :username, uniqueness: true
 
   has_many :challenges
@@ -18,6 +20,10 @@ class User < ApplicationRecord
 
   def twilio_client
     @twilio_client ||= TwilioClient.new
+  end
+
+  def confirm!
+    update!(confirmed: true, confirmation_token: nil)
   end
 
   def self.drew

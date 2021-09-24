@@ -28,8 +28,8 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when password is empty" do
-      let(:user) { create(:user) }
+    context "when password is empty on a new model" do
+      let(:user) { build(:user) }
 
       before do
         user.password = nil
@@ -40,8 +40,8 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when password_confirmation is empty" do
-      let(:user) { create(:user) }
+    context "when password_confirmation is empty on a new model" do
+      let(:user) { build(:user) }
 
       before do
         user.password_confirmation = nil

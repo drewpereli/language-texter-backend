@@ -26,8 +26,36 @@ RSpec.describe "Users", type: :request do
     end
   end
 
+  describe "POST create" do
+    subject(:post_create) { post "/users", params: {user: create_params} }
+
+    let(:create_params) do
+      {
+        username: "foobar",
+        phone_number: "+1112223333",
+        password: "abcdefg",
+        password_confirmation: "abcdefg"
+      }
+    end
+
+    it "creates a new User with confirmed = false and correct attributes" do
+      expect { post_create }.to change(User, :count).by(1)
+      user = User.find(parsed_body["user"]["id"])
+      expect(user.username).to eql("foobar")
+      expect(user.phone_number).to eql("+1112223333")
+    end
+
+    it "creates a new user with confirmed = false and a confirmation token" do
+      expect { post_create }.to change(User, :count).by(1)
+      user = User.find(parsed_body["user"]["id"])
+      expect(user.confirmed).to be_falsey
+      expect(user.confirmation_token).to be_a(String)
+      expect(user.confirmation_token.length).to be >= 24
+    end
+  end
+
   describe "login" do
-    subject(:post_login) { post "/login", params: params }
+    subject(:post_login) { post "/users/login", params: params }
 
     let!(:user) { create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword") }
 
@@ -89,7 +117,7 @@ RSpec.describe "Users", type: :request do
   end
 
   describe "change_password" do
-    subject(:post_change_password) { post "/change_password", params: params, headers: authenticated_headers }
+    subject(:post_change_password) { post "/users/change_password", params: params, headers: authenticated_headers }
 
     let!(:user) { create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword") }
 
@@ -145,6 +173,67 @@ RSpec.describe "Users", type: :request do
         post_change_password
         user.reload
         expect(user.authenticate("mynewpassword")).to be_falsey
+      end
+    end
+  end
+
+  describe "POST confirm" do
+    subject(:post_confirm) { post "/users/#{user_id}/confirm", params: {confirmation_token: confirmation_token} }
+
+    let!(:user) { create(:user, confirmed: false, confirmation_token: "abc") }
+    let(:confirmation_token) { "abc" }
+    let(:user_id) { user.id }
+
+    shared_examples "it succeeds" do
+      it "responds with a 200" do
+        post_confirm
+        expect(response.status).to be(200)
+      end
+
+      it "confirms the user" do
+        post_confirm
+        user.reload
+        expect(user.confirmed).to be_truthy
+      end
+    end
+
+    shared_examples "it fails" do
+      it "responds with a 404" do
+        post_confirm
+        expect(response.status).to be(404)
+      end
+
+      it "does not confirm the user" do
+        post_confirm
+        user.reload
+        expect(user.confirmed).to be_falsey
+      end
+    end
+
+    context "when the token is correct" do
+      include_examples "it succeeds"
+    end
+
+    context "when the token is incorrect" do
+      let(:confirmation_token) { "abcdef" }
+
+      include_examples "it fails"
+    end
+
+    context "when the user id doesn't exist" do
+      let(:user_id) { 9999 }
+
+      include_examples "it fails"
+    end
+
+    context "when the user is already confirmed" do
+      before do
+        user.update!(confirmed: true)
+      end
+
+      it "responds with a 404" do
+        post_confirm
+        expect(response.status).to be(404)
       end
     end
   end
