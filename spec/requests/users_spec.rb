@@ -57,7 +57,10 @@ RSpec.describe "Users", type: :request do
   describe "login" do
     subject(:post_login) { post "/users/login", params: params }
 
-    let!(:user) { create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword") }
+    let!(:user) do
+      create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword",
+                    confirmed: true)
+    end
 
     context "when username and password are correct" do
       let(:params) do
@@ -107,6 +110,21 @@ RSpec.describe "Users", type: :request do
     context "when password is blank" do
       let(:params) do
         {username: "myusername"}
+      end
+
+      it "responds with a 401" do
+        post_login
+        expect(response.status).to be(401)
+      end
+    end
+
+    context "when user is not confirmed" do
+      let(:params) do
+        {username: "myusername", password: "mypassword"}
+      end
+
+      before do
+        user.update(confirmed: false)
       end
 
       it "responds with a 401" do

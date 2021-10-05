@@ -29,4 +29,18 @@ class User < ApplicationRecord
   def self.drew
     find_by(username: "drew")
   end
+
+  def self.create_and_send_confirmation(attrs)
+    create(attrs).tap do |user|
+      break user unless user.persisted?
+
+      front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+
+      url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+
+      message = "Please click this link to confirm your account. #{url}"
+
+      user.text(message)
+    end
+  end
 end

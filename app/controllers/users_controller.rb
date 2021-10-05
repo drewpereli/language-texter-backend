@@ -10,10 +10,9 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.create(create_params)
+    @user = User.create_and_send_confirmation(create_params)
 
     if @user.valid?
-      # process validation
       render json: @user
     else
       render json: {errors: @user.errors}, status: :unauthorized
@@ -40,18 +39,20 @@ class UsersController < ApplicationController
   def login
     @user = User.find_by(username: login_params[:username])
 
-    if @user&.authenticate(login_params[:password])
+    if @user.nil? || !@user&.authenticate(login_params[:password])
+      render json: {errors: "Invalid username or password"}, status: :unauthorized
+    elsif !@user.confirmed
+      render json: {errors: "You haven't confirmed your account yet"}, status: :unauthorized
+    else
       token = @user.token
       render json: {user: {id: @user.id, username: @user.username}, token: token}
-    else
-      render json: {errors: "Invalid username or password"}, status: :unauthorized
     end
   end
 
   def confirm
     @user = User.find_by(id: params[:id])
 
-    return render json: {errors: ["Invalid"]}, status: :not_found if @user.nil?
+    return render json: {errors: ["Invalid user id or token"]}, status: :not_found if @user.nil?
 
     return render json: {errors: ["User already confirmed"]}, status: :not_found if @user.confirmed
 
@@ -62,7 +63,7 @@ class UsersController < ApplicationController
     end
 
     unless confirm_params[:confirmation_token] == @user.confirmation_token
-      return render json: {errors: ["Invalid"]}, status: :not_found
+      return render json: {errors: ["Invalid user id or token"]}, status: :not_found
     end
 
     @user.confirm!
