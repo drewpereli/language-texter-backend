@@ -40,6 +40,19 @@ RSpec.describe User, type: :model do
       end
     end
 
+    context "when password is less than 12 characters long on a new model" do
+      let(:user) { build(:user) }
+
+      before do
+        user.password = "this-is-bad"
+        user.password_confirmation = "this-is-bad"
+      end
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+
     context "when password_confirmation is empty on a new model" do
       let(:user) { build(:user) }
 

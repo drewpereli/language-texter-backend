@@ -7,6 +7,7 @@ class User < ApplicationRecord
   validates :username, :phone_number, presence: true
   validates :password, :password_confirmation, presence: true, on: :create
   validates :username, uniqueness: true
+  validates_length_of :password, within: 12..100, on: :create
 
   has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
   has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"

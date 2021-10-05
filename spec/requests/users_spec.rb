@@ -33,8 +33,8 @@ RSpec.describe "Users", type: :request do
       {
         username: "foobar",
         phone_number: "+1112223333",
-        password: "abcdefg",
-        password_confirmation: "abcdefg"
+        password: "this-is-my-pretty-alright-password",
+        password_confirmation: "this-is-my-pretty-alright-password"
       }
     end
 
@@ -58,13 +58,14 @@ RSpec.describe "Users", type: :request do
     subject(:post_login) { post "/users/login", params: params }
 
     let!(:user) do
-      create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword",
+      create(:user, username: "myusername", password: "this-is-my-pretty-alright-password",
+                    password_confirmation: "this-is-my-pretty-alright-password",
                     confirmed: true)
     end
 
     context "when username and password are correct" do
       let(:params) do
-        {username: "myusername", password: "mypassword"}
+        {username: "myusername", password: "this-is-my-pretty-alright-password"}
       end
 
       it "responds with a token" do
@@ -120,7 +121,7 @@ RSpec.describe "Users", type: :request do
 
     context "when user is not confirmed" do
       let(:params) do
-        {username: "myusername", password: "mypassword"}
+        {username: "myusername", password: "this-is-my-pretty-alright-password"}
       end
 
       before do
@@ -137,7 +138,10 @@ RSpec.describe "Users", type: :request do
   describe "change_password" do
     subject(:post_change_password) { post "/users/change_password", params: params, headers: authenticated_headers }
 
-    let!(:user) { create(:user, username: "myusername", password: "mypassword", password_confirmation: "mypassword") }
+    let!(:user) do
+      create(:user, username: "myusername", password: "this-is-my-pretty-alright-password",
+                    password_confirmation: "this-is-my-pretty-alright-password")
+    end
 
     let(:params) do
       {
@@ -147,9 +151,9 @@ RSpec.describe "Users", type: :request do
       }
     end
 
-    let(:old_password) { "mypassword" }
-    let(:new_password) { "mynewpassword" }
-    let(:new_password_confirmation) { "mynewpassword" }
+    let(:old_password) { "this-is-my-pretty-alright-password" }
+    let(:new_password) { "this-is-my-new-pretty-alright-password" }
+    let(:new_password_confirmation) { "this-is-my-new-pretty-alright-password" }
 
     context "when params are correct" do
       it "responds with a 204" do
@@ -160,7 +164,7 @@ RSpec.describe "Users", type: :request do
       it "updates the user password" do
         post_change_password
         user.reload
-        expect(user.authenticate("mynewpassword")).to be_truthy
+        expect(user.authenticate("this-is-my-new-pretty-alright-password")).to be_truthy
       end
     end
 
@@ -175,7 +179,7 @@ RSpec.describe "Users", type: :request do
       it "doesn't update the user password" do
         post_change_password
         user.reload
-        expect(user.authenticate("mynewpassword")).to be_falsey
+        expect(user.authenticate("this-is-my-new-pretty-alright-password")).to be_falsey
       end
     end
 
@@ -190,7 +194,7 @@ RSpec.describe "Users", type: :request do
       it "doesn't update the user password" do
         post_change_password
         user.reload
-        expect(user.authenticate("mynewpassword")).to be_falsey
+        expect(user.authenticate("this-is-my-new-pretty-alright-password")).to be_falsey
       end
     end
   end
