@@ -47,14 +47,11 @@ RSpec.describe Challenge, type: :model do
 
     let(:challenge) { create(:challenge) }
 
-    before do
-      create(:user, username: "christina", phone_number: "+18888888888")
-    end
-
     it "updates the challenge status and texts christina" do
-      expect_any_instance_of(User).to receive(:text)
-                                        .with("Drew has completed the challenge \"#{challenge.spanish_text}\"!")
-                                        .and_return(nil)
+      expect_any_instance_of(User)
+        .to receive(:text)
+              .with("#{challenge.student.username} has completed the challenge \"#{challenge.spanish_text}\"!")
+              .and_return(nil)
 
       mark_as_complete
 
@@ -96,10 +93,11 @@ RSpec.describe Challenge, type: :model do
   describe ".create_and_process" do
     subject(:create_and_process) { described_class.create_and_process(attrs) }
 
-    let(:user) { create(:user, username: "drew") }
+    let(:student) { create(:user) }
+    let(:creator) { create(:user) }
 
     let(:attrs) do
-      {spanish_text: "foo", english_text: "bar", user: user}
+      {spanish_text: "foo", english_text: "bar", student: student, creator: creator}
     end
 
     before do
@@ -111,7 +109,7 @@ RSpec.describe Challenge, type: :model do
         expect { create_and_process }.to change(described_class, :count).by(1)
       end
 
-      it "texts drew" do
+      it "texts the student" do
         expect_any_instance_of(User).to receive(:text)
         create_and_process
       end
@@ -119,7 +117,7 @@ RSpec.describe Challenge, type: :model do
 
     context "when english text and spanish text has extra spaces" do
       let(:attrs) do
-        {spanish_text: "  foo    ", english_text: "  bar    ", user: user}
+        {spanish_text: "  foo    ", english_text: "  bar    ", student: student, creator: creator}
       end
 
       it "strips them" do
@@ -132,7 +130,7 @@ RSpec.describe Challenge, type: :model do
 
     context "when attrs are invalid" do
       let(:attrs) do
-        {spanish_text: nil, english_text: "bar", user: user}
+        {spanish_text: nil, english_text: "bar", student: student, creator: creator}
       end
 
       it "doesn't create a challenge" do

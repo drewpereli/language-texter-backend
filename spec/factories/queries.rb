@@ -3,7 +3,6 @@
 FactoryBot.define do
   factory :query do
     challenge
-    user
 
     sequence :language do |n|
       n.even? ? "english" : "spanish"

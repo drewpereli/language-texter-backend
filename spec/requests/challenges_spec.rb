@@ -41,16 +41,14 @@ RSpec.describe "Challenges", type: :request do
   describe "POST create" do
     subject(:post_create) { post "/challenges", params: {challenge: create_params}, headers: authenticated_headers }
 
+    let(:student) { create(:user) }
+
     let(:create_params) do
       {
         spanish_text: "amigo",
-        english_text: "friend"
+        english_text: "friend",
+        student_id: student.id
       }
-    end
-
-    before do
-      allow(User).to receive(:drew).and_return(user)
-      allow(user).to receive(:text).and_return(nil)
     end
 
     it "creates a new Challenge" do

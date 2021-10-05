@@ -9,7 +9,8 @@ class ChallengeSerializer < ActiveModel::Serializer
              :required_streak_for_completion,
              :status,
              :created_at,
-             :user_id,
+             :student_id,
+             :creator_id,
              :current_streak
 
   def current_streak

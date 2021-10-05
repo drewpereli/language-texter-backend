@@ -23,7 +23,7 @@ class ChallengesController < ApplicationController
 
   # POST /challenges
   def create
-    @challenge = Challenge.create_and_process(challenge_params.merge(user: current_user))
+    @challenge = Challenge.create_and_process(challenge_params.merge(creator: current_user))
 
     if @challenge.valid?
       render json: @challenge
@@ -62,7 +62,8 @@ class ChallengesController < ApplicationController
       :english_text,
       :spanish_text_note,
       :english_text_note,
-      :required_streak_for_completion
+      :required_streak_for_completion,
+      :student_id
     )
   end
 end

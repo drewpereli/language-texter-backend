@@ -3,12 +3,13 @@
 class Challenge < ApplicationRecord
   enum status: %i[queued active complete]
 
-  belongs_to :user
+  belongs_to :student, class_name: "User", foreign_key: "student_id"
+  belongs_to :creator, class_name: "User", foreign_key: "creator_id"
 
   has_many :queries, dependent: :destroy
   has_many :attempts, through: :queries
 
-  validates :spanish_text, :english_text, :user, presence: true
+  validates :spanish_text, :english_text, :student, :creator, presence: true
 
   MAX_ACTIVE = 10
 
@@ -25,9 +26,7 @@ class Challenge < ApplicationRecord
 
     self.class.first_in_queue&.active! if self.class.need_more_active?
 
-    christina = User.find_by(username: "christina")
-
-    christina&.text("Drew has completed the challenge \"#{spanish_text}\"!")
+    creator.text("#{student.username} has completed the challenge \"#{spanish_text}\"!") unless creator_id == student_id
   end
 
   def process_attempt(attempt)
@@ -45,6 +44,11 @@ class Challenge < ApplicationRecord
     end
   end
 
+  def create_and_send_query
+    query = Query.create(challenge: self, language: random_language)
+    query.send_message
+  end
+
   class << self
     def create_and_process(attrs)
       attrs[:spanish_text] = attrs[:spanish_text]&.strip
@@ -54,7 +58,7 @@ class Challenge < ApplicationRecord
         challenge.update(status: "active") if need_more_active?
 
         if challenge.valid?
-          User.drew.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.")
+          challenge.student.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.")
         end
       end
     end
@@ -65,6 +69,24 @@ class Challenge < ApplicationRecord
 
     def first_in_queue
       queued.first
+    end
+
+    def random_active_not_last
+      active.where.not(id: last_query.challenge_id).sample
+    end
+
+    def random_complete
+      complete.sample
+    end
+  end
+
+  private
+
+  def random_language
+    if rand < 0.66
+      "english"
+    else
+      "spanish"
     end
   end
 end
