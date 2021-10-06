@@ -44,7 +44,7 @@ class UsersController < ApplicationController
     elsif !@user.confirmed
       render json: {errors: "You haven't confirmed your account yet"}, status: :unauthorized
     else
-      token = @user.token
+      token = @user.jwt_token
       render json: {user: {id: @user.id, username: @user.username}, token: token}
     end
   end

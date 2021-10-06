@@ -12,7 +12,7 @@ class User < ApplicationRecord
   has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
   has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"
 
-  def token
+  def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
 

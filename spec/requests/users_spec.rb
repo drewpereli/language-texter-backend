@@ -71,7 +71,7 @@ RSpec.describe "Users", type: :request do
       it "responds with a token" do
         post_login
         expect(parsed_body["user"]["id"]).to eql(user.id)
-        expect(parsed_body["token"]).to eql(user.token)
+        expect(parsed_body["token"]).to eql(user.jwt_token)
       end
     end
 
