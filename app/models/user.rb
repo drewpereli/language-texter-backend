@@ -2,13 +2,17 @@
 
 class User < ApplicationRecord
   has_secure_password
+  has_secure_token :confirmation_token
 
-  validates :username, :phone_number, :password, :password_confirmation, presence: true
+  validates :username, :phone_number, presence: true
+  validates :password, :password_confirmation, presence: true, on: :create
   validates :username, uniqueness: true
+  validates_length_of :password, within: 12..100, on: :create
 
-  has_many :challenges
+  has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
+  has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"
 
-  def token
+  def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
 
@@ -20,7 +24,21 @@ class User < ApplicationRecord
     @twilio_client ||= TwilioClient.new
   end
 
-  def self.drew
-    find_by(username: "drew")
+  def confirm!
+    update!(confirmed: true, confirmation_token: nil)
+  end
+
+  def self.create_and_send_confirmation(attrs)
+    create(attrs).tap do |user|
+      break user unless user.persisted?
+
+      front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+
+      url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+
+      message = "Please click this link to confirm your account. #{url}"
+
+      user.text(message)
+    end
   end
 end

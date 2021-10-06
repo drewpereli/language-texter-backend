@@ -7,6 +7,8 @@ class TwilioClient
   end
 
   def text_number(number, message)
+    return if Rails.env.test?
+
     client.messages.create({
       from: from_number,
       to: number,

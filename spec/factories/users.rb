@@ -10,8 +10,8 @@ FactoryBot.define do
       "+1#{n.to_s.rjust(9, "0")}"
     end
 
-    password { "my-password" }
-    password_confirmation { "my-password" }
+    password { "my-long-password" }
+    password_confirmation { "my-long-password" }
 
     trait :drew do
       username { "drew" }

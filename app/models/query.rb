@@ -4,17 +4,18 @@ class Query < ApplicationRecord
   enum language: %i[spanish english]
 
   belongs_to :challenge
-  belongs_to :user
+
+  has_one :student, through: :challenge
 
   has_one :attempt, dependent: :destroy
 
   def send_message
-    twilio_client.text_number(user.phone_number, message)
+    twilio_client.text_number(student.phone_number, message)
     update(last_sent_at: Time.now)
   end
 
   def resend_message
-    twilio_client.text_number(user.phone_number, "Respond you americano ignorante. #{message}")
+    twilio_client.text_number(student.phone_number, "Respond you americano ignorante. #{message}")
     update(last_sent_at: Time.now)
   end
 

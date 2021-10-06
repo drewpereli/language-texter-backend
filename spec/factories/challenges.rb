@@ -2,7 +2,8 @@
 
 FactoryBot.define do
   factory :challenge do
-    user
+    student factory: :user
+    creator factory: :user
 
     sequence :spanish_text do |n|
       "my-spanish-text=#{n}"

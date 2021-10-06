@@ -36,9 +36,11 @@ RSpec.describe Attempt, type: :model do
     let(:u1) { create(:user, username: "u1", phone_number: "abc") }
     let(:u2) { create(:user, username: "u2", phone_number: "def") }
     let(:challenge) do
-      create(:challenge, spanish_text: challenge_spanish_text, english_text: challenge_english_text, user: u1)
+      create(:challenge, spanish_text: challenge_spanish_text, english_text: challenge_english_text, creator: u1,
+                         student: u2)
     end
-    let(:query) { create(:query, challenge: challenge, user: u2, language: query_language) }
+
+    let(:query) { create(:query, challenge: challenge, language: query_language) }
     let(:attempt) { create(:attempt, query: query, text: attempt_text) }
 
     let(:challenge_spanish_text) { "amigo" }

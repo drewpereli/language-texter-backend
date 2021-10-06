@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_14_035103) do
+ActiveRecord::Schema.define(version: 2021_10_05_053226) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 2021_09_14_035103) do
 
   create_table "challenges", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
+    t.integer "creator_id", null: false
     t.integer "current_streak", default: 0, null: false
     t.string "english_text", null: false
     t.string "english_text_note"
@@ -30,9 +31,10 @@ ActiveRecord::Schema.define(version: 2021_09_14_035103) do
     t.string "spanish_text", null: false
     t.string "spanish_text_note"
     t.integer "status", default: 0, null: false
+    t.integer "student_id", null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_challenges_on_user_id"
+    t.index ["creator_id"], name: "index_challenges_on_creator_id"
+    t.index ["student_id"], name: "index_challenges_on_student_id"
   end
 
   create_table "queries", force: :cascade do |t|
@@ -42,12 +44,12 @@ ActiveRecord::Schema.define(version: 2021_09_14_035103) do
     t.integer "language", default: 0, null: false
     t.datetime "last_sent_at"
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "user_id", null: false
     t.index ["challenge_id"], name: "index_queries_on_challenge_id"
-    t.index ["user_id"], name: "index_queries_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "confirmation_token"
+    t.boolean "confirmed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.string "password_digest", null: false
     t.string "phone_number", null: false
