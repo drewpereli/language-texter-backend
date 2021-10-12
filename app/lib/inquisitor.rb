@@ -6,14 +6,14 @@ class Inquisitor
     def send_text_if_time
       return unless appropriate_time_for_text?
 
-      if last_query_waiting_on_attempt?
+      if last_question_waiting_on_attempt?
         send_reminder_if_time
       elsif rand < 0.1
-        send_new_query
+        send_new_question
       end
     end
 
-    def send_new_query
+    def send_new_question
       # 10% to send complete challenge
       challenge = if rand < 0.1
                     Challenge.random_complete
@@ -25,15 +25,15 @@ class Inquisitor
     end
 
     def send_reminder_if_time
-      last_query.resend_message if last_query.time_since_last_sent >= 1.hour
+      last_question.resend_message if last_question.time_since_last_sent >= 1.hour
     end
 
-    def last_query_waiting_on_attempt?
-      last_query.attempt.nil?
+    def last_question_waiting_on_attempt?
+      last_question.attempt.nil?
     end
 
-    def last_query
-      Query.last
+    def last_question
+      Question.last
     end
 
     def appropriate_time_for_text?

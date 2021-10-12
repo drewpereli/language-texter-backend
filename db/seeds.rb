@@ -18,8 +18,8 @@ if Rails.env == "production"
       {spanish_text: "hola", english_text: "hello", user: drew}
     )
 
-    query = Query.create(challenge: challenge, language: "spanish")
+    question = Question.create(challenge: challenge, language: "spanish")
 
-    query.send_message
+    question.send_message
   end
 end

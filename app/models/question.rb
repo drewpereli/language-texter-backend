@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query < ApplicationRecord
+class Question < ApplicationRecord
   enum language: %i[spanish english]
 
   belongs_to :challenge

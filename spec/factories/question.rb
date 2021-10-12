@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :query do
+  factory :question do
     challenge
 
     sequence :language do |n|

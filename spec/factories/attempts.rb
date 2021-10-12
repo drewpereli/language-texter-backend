@@ -2,16 +2,16 @@
 
 FactoryBot.define do
   factory :attempt do
-    query
+    question
 
     text { "my attempt text" }
 
     trait :correct do
-      text { query.correct_text }
+      text { question.correct_text }
     end
 
     trait :incorrect do
-      text { "#{query.correct_text}abc" }
+      text { "#{question.correct_text}abc" }
     end
   end
 end

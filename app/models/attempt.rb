@@ -9,11 +9,11 @@ class Attempt < ApplicationRecord
     :correct_complete # attempt was correct for an already-complete challenge
   ]
 
-  belongs_to :query
+  belongs_to :question
 
-  has_one :challenge, through: :query
+  has_one :challenge, through: :question
 
-  scope :for_challenge, ->(challenge) { joins(:query).where(queries: {challenge: challenge}) }
+  scope :for_challenge, ->(challenge) { joins(:question).where(questions: {challenge: challenge}) }
 
   DEFAULT_TOKENIZER_OPTIONS = {
     expand_contractions: true,
@@ -30,7 +30,7 @@ class Attempt < ApplicationRecord
   def response_message
     case result_status
     when "incorrect_active"
-      "Estas equivocado, idiota. The correct answer is '#{query.correct_text}'."
+      "Estas equivocado, idiota. The correct answer is '#{question.correct_text}'."
     when "correct_active_insufficient"
       if challenge.correct_attempts_still_required == 1
         "Good job, that's correct! You only need 1 more correct guess to complete this challenge!"
@@ -53,7 +53,7 @@ class Attempt < ApplicationRecord
   end
 
   def challenge_test_text
-    get_test_text(query.correct_text)
+    get_test_text(question.correct_text)
   end
 
   def response_test_text
@@ -67,7 +67,7 @@ class Attempt < ApplicationRecord
   end
 
   def response_language_abbreviation
-    if query.response_language == "spanish"
+    if question.response_language == "spanish"
       :es
     else
       :en
@@ -95,7 +95,7 @@ class Attempt < ApplicationRecord
     create(attrs).tap do |attempt|
       attempt.update(result_status: attempt.compute_result_status)
       attempt.challenge.process_attempt(attempt)
-      attempt.query.student.text(attempt.response_message)
+      attempt.question.student.text(attempt.response_message)
     end
   end
 end

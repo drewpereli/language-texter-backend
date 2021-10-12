@@ -10,12 +10,12 @@ RSpec.describe "Twilio", type: :request do
       {"Body" => request_message}
     end
 
-    context "when there is an active query" do
+    context "when there is an active question" do
       let!(:challenge) do
         create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "complete", student: student,
                            creator: creator)
       end
-      let!(:query) { create(:query, :expecting_english_response, challenge: challenge) }
+      let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
       let!(:creator) { create(:user) }
       let!(:student) { create(:user) }
 
@@ -50,7 +50,7 @@ RSpec.describe "Twilio", type: :request do
           create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "active", student: student,
                              creator: creator)
         end
-        let!(:query) { create(:query, :expecting_english_response, challenge: challenge) }
+        let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
 
         before do
           create(:challenge, id: 2, status: "queued")
@@ -112,7 +112,7 @@ RSpec.describe "Twilio", type: :request do
       end
     end
 
-    context "when the last query was already attempted" do
+    context "when the last question was already attempted" do
       let(:request_message) { "abc" }
 
       before do

@@ -4,9 +4,9 @@ class TwilioController < ApplicationController
   skip_before_action :ensure_authenticated
 
   def guess
-    unless Query.current_active.present?
+    unless Question.current_active.present?
       response = Twilio::TwiML::MessagingResponse.new do |r|
-        r.message body: "There isn't an active query right now."
+        r.message body: "There isn't an active question right now."
       end
 
       render xml: response.to_s
@@ -14,7 +14,7 @@ class TwilioController < ApplicationController
       return
     end
 
-    Attempt.create_and_process(text: params["Body"], query: Query.current_active)
+    Attempt.create_and_process(text: params["Body"], question: Question.current_active)
 
     head :no_content
   end
