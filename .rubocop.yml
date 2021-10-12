@@ -69,3 +69,8 @@ Naming/VariableNumber:
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented_relative_to_receiver
+
+RSpec/RepeatedExample: 
+  Enabled: true
+  Exclude:
+    - spec/policies/**/*
