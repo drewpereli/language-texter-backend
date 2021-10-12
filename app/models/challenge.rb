@@ -6,8 +6,8 @@ class Challenge < ApplicationRecord
   belongs_to :student, class_name: "User", foreign_key: "student_id"
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
 
-  has_many :queries, dependent: :destroy
-  has_many :attempts, through: :queries
+  has_many :questions, dependent: :destroy
+  has_many :attempts, through: :questions
 
   validates :spanish_text, :english_text, :student, :creator, presence: true
 
@@ -44,9 +44,9 @@ class Challenge < ApplicationRecord
     end
   end
 
-  def create_and_send_query
-    query = Query.create(challenge: self, language: random_language)
-    query.send_message
+  def create_and_send_question
+    question = Question.create(challenge: self, language: random_language)
+    question.send_message
   end
 
   class << self
@@ -72,7 +72,7 @@ class Challenge < ApplicationRecord
     end
 
     def random_active_not_last
-      active.where.not(id: last_query.challenge_id).sample
+      active.where.not(id: last_question.challenge_id).sample
     end
 
     def random_complete

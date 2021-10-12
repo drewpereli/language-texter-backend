@@ -17,7 +17,7 @@ RSpec.describe "Challenges", type: :request do
     end
 
     before do
-      create_list(:challenge, 10, status: :queued)
+      create_list(:challenge, 10, status: :queued, student: user)
     end
 
     it "responds with the Challenge records " do
@@ -29,7 +29,7 @@ RSpec.describe "Challenges", type: :request do
   describe "GET show" do
     subject(:get_show) { get "/challenges/#{challenge.id}", headers: authenticated_headers }
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, student: user) }
 
     it "gets the requested Challenge" do
       get_show
@@ -63,7 +63,7 @@ RSpec.describe "Challenges", type: :request do
           headers: authenticated_headers
     end
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, creator: user) }
 
     let(:update_params) do
       {spanish_text: "my changed val"}
@@ -79,7 +79,7 @@ RSpec.describe "Challenges", type: :request do
   describe "DELETE destroy" do
     subject(:delete_destroy) { delete "/challenges/#{challenge.id}", headers: authenticated_headers }
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, creator: user) }
 
     it "destroys the requested Challenge" do
       expect { delete_destroy }.to change(Challenge, :count).by(-1)

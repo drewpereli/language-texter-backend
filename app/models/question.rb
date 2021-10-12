@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query < ApplicationRecord
+class Question < ApplicationRecord
   enum language: %i[spanish english]
 
   belongs_to :challenge
@@ -45,6 +45,10 @@ class Query < ApplicationRecord
 
   def time_since_last_sent
     Time.now - last_sent_at
+  end
+
+  def attempted?
+    attempt.present?
   end
 
   def self.current_active

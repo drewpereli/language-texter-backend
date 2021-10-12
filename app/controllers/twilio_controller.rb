@@ -2,11 +2,16 @@
 
 class TwilioController < ApplicationController
   skip_before_action :ensure_authenticated
+  skip_after_action :verify_authorized
 
   def guess
-    unless Query.current_active.present?
+    user = User.find_by(phone_number: params["From"])
+
+    return unless user.present?
+
+    unless user.active_question.present?
       response = Twilio::TwiML::MessagingResponse.new do |r|
-        r.message body: "There isn't an active query right now."
+        r.message body: "There isn't an active question right now."
       end
 
       render xml: response.to_s
@@ -14,7 +19,7 @@ class TwilioController < ApplicationController
       return
     end
 
-    Attempt.create_and_process(text: params["Body"], query: Query.current_active)
+    Attempt.create_and_process(text: params["Body"], question: user.active_question)
 
     head :no_content
   end

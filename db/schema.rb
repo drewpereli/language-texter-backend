@@ -10,15 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_05_053226) do
+ActiveRecord::Schema.define(version: 2021_10_12_044714) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
-    t.integer "query_id", null: false
+    t.integer "question_id", null: false
     t.integer "result_status"
     t.string "text", null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["query_id"], name: "index_attempts_on_query_id"
+    t.index ["question_id"], name: "index_attempts_on_question_id"
   end
 
   create_table "challenges", force: :cascade do |t|
@@ -37,14 +37,14 @@ ActiveRecord::Schema.define(version: 2021_10_05_053226) do
     t.index ["student_id"], name: "index_challenges_on_student_id"
   end
 
-  create_table "queries", force: :cascade do |t|
+  create_table "questions", force: :cascade do |t|
     t.integer "challenge_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.boolean "for_already_completed_challenge", default: false, null: false
     t.integer "language", default: 0, null: false
     t.datetime "last_sent_at"
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["challenge_id"], name: "index_queries_on_challenge_id"
+    t.index ["challenge_id"], name: "index_questions_on_challenge_id"
   end
 
   create_table "users", force: :cascade do |t|

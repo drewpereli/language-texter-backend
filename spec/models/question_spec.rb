@@ -2,14 +2,14 @@
 
 require "rails_helper"
 
-RSpec.describe Query, type: :model do
+RSpec.describe Question, type: :model do
   describe "#message" do
-    subject(:message) { query.message }
+    subject(:message) { question.message }
 
     let(:challenge) { create(:challenge, spanish_text: "foo", english_text: "bar") }
 
     context "when language is spanish" do
-      let(:query) { create(:query, challenge: challenge, language: "spanish") }
+      let(:question) { create(:question, challenge: challenge, language: "spanish") }
 
       it { is_expected.to eql("What does 'foo' mean?") }
 
@@ -31,7 +31,7 @@ RSpec.describe Query, type: :model do
     end
 
     context "when language is english" do
-      let(:query) { create(:query, challenge: challenge, language: "english") }
+      let(:question) { create(:question, challenge: challenge, language: "english") }
 
       it { is_expected.to eql("How do you say 'bar' in spanish?") }
 
