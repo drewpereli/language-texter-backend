@@ -5,6 +5,8 @@ class ChallengesController < ApplicationController
 
   # GET /challenges/1
   def show
+    authorize(@challenge)
+
     render json: @challenge
   end
 
@@ -12,7 +14,7 @@ class ChallengesController < ApplicationController
   def index
     return render json: {errors: "must specify a status"} unless params[:status]
 
-    @challenges = Challenge
+    @challenges = policy_scope(Challenge)
                     .where(status: params[:status])
                     .order(created_at: :desc)
                     .page(params[:page])
@@ -23,6 +25,8 @@ class ChallengesController < ApplicationController
 
   # POST /challenges
   def create
+    authorize(Challenge)
+
     @challenge = Challenge.create_and_process(challenge_params.merge(creator: current_user))
 
     if @challenge.valid?
@@ -34,6 +38,8 @@ class ChallengesController < ApplicationController
 
   # PATCH/PUT /challenges/1
   def update
+    authorize(@challenge)
+
     if @challenge.update(challenge_params)
       render json: @challenge
     else
@@ -43,6 +49,8 @@ class ChallengesController < ApplicationController
 
   # DELETE /challenges/1
   def destroy
+    authorize(@challenge)
+
     @challenge.destroy
 
     head :no_content
