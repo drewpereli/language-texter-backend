@@ -166,6 +166,10 @@ GEM
     parallel (1.20.1)
     parser (3.0.1.1)
       ast (~> 2.4.1)
+    phony (2.19.5)
+    phony_rails (0.15.0)
+      activesupport (>= 3.0)
+      phony (>= 2.18.12)
     pragmatic_tokenizer (3.2.0)
       unicode
     pry (0.14.1)
@@ -295,6 +299,7 @@ DEPENDENCIES
   jwt
   kaminari
   listen (~> 3.3)
+  phony_rails
   pragmatic_tokenizer
   puma (~> 5.0)
   pundit

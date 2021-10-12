@@ -68,3 +68,5 @@ gem "pragmatic_tokenizer"
 gem "kaminari"
 
 gem "pundit"
+
+gem "phony_rails"
