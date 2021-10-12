@@ -29,7 +29,7 @@ class Inquisitor
     end
 
     def last_question_waiting_on_attempt?
-      last_question.attempt.nil?
+      !last_question.attempted?
     end
 
     def last_question

@@ -7,17 +7,19 @@ RSpec.describe "Twilio", type: :request do
     subject(:post_create) { post "/twilio/guess", params: guess_params }
 
     let(:guess_params) do
-      {"Body" => request_message}
+      {"Body" => request_message, "From" => student.phone_number}
     end
+
+    let!(:student) { create(:user) }
 
     context "when there is an active question" do
       let!(:challenge) do
         create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "complete", student: student,
                            creator: creator)
       end
+
       let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
       let!(:creator) { create(:user) }
-      let!(:student) { create(:user) }
 
       before do
         allow(Rails.application.credentials).to receive(:twilio).and_return({account_ssid: 123, auth_token: "abc"})
@@ -50,6 +52,7 @@ RSpec.describe "Twilio", type: :request do
           create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "active", student: student,
                              creator: creator)
         end
+
         let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
 
         before do

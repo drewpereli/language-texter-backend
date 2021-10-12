@@ -47,6 +47,10 @@ class Question < ApplicationRecord
     Time.now - last_sent_at
   end
 
+  def attempted?
+    attempt.present?
+  end
+
   def self.current_active
     return nil if last.attempt.present?
 

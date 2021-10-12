@@ -28,6 +28,14 @@ class User < ApplicationRecord
     update!(confirmed: true, confirmation_token: nil)
   end
 
+  def active_question
+    last_question = Question.where(challenge: challenges_assigned).order(created_at: :desc).first
+
+    return nil if last_question.nil?
+
+    last_question.attempted? ? nil : last_question
+  end
+
   def self.create_and_send_confirmation(attrs)
     create(attrs).tap do |user|
       break user unless user.persisted?
