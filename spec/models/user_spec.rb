@@ -4,6 +4,14 @@ require "rails_helper"
 
 RSpec.describe User, type: :model do
   describe "#valid?" do
+    context "when all required fields are present" do
+      let(:user) { create(:user) }
+
+      it "is true" do
+        expect(user).to be_valid
+      end
+    end
+
     context "when some required fields are missing" do
       shared_examples "field is required" do |params|
         let(:user) { create(:user) }
@@ -78,14 +86,6 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when all required fields are present" do
-      let(:user) { create(:user) }
-
-      it "is true" do
-        expect(user).to be_valid
-      end
-    end
-
     context "when trying to create a user with a username that's been taken already" do
       let!(:old_user) { create(:user, username: "foo") }
       let(:user) { create(:user, username: "other") }
@@ -97,6 +97,30 @@ RSpec.describe User, type: :model do
       it "is false" do
         expect(user).not_to be_valid
       end
+    end
+
+    context "when phone number is invalid" do
+      let(:user) { create(:user) }
+
+      before { user.phone_number = "abc" }
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+  end
+
+  describe ".save" do
+    let(:user) { create(:user) }
+
+    before do
+      user.phone_number = "222-333-4444"
+      user.save
+      user.reload
+    end
+
+    it "normalizes the phone number before saving" do
+      expect(user.phone_number).to eql("+12223334444")
     end
   end
 end
