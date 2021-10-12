@@ -99,6 +99,19 @@ RSpec.describe User, type: :model do
       end
     end
 
+    context "when trying to create a user with a phone number that's been taken already" do
+      let!(:old_user) { create(:user, phone_number: "222-333-4444") }
+      let(:user) { create(:user, phone_number: "555-666-7777") }
+
+      before do
+        user.phone_number = "222-333-4444"
+      end
+
+      it "is false" do
+        expect(user).not_to be_valid
+      end
+    end
+
     context "when phone number is invalid" do
       let(:user) { create(:user) }
 
