@@ -4,10 +4,9 @@ class User < ApplicationRecord
   has_secure_password
   has_secure_token :confirmation_token
 
-  validates :username, :phone_number, presence: true
-  validates :password, :password_confirmation, presence: true, on: :create
-  validates :username, uniqueness: true
-  validates_length_of :password, within: 12..100, on: :create
+  validates :username, :phone_number, presence: true, uniqueness: true
+  validates :password, :password_confirmation, presence: true, if: :password
+  validates_length_of :password, within: 12..100, if: :password
   validates_plausible_phone :phone_number
   phony_normalize :phone_number, country_code: "US"
 
