@@ -32,7 +32,7 @@ RSpec.describe "Users", type: :request do
     let(:create_params) do
       {
         username: "foobar",
-        phone_number: "+1112223333",
+        phone_number: "+12223334444",
         password: "this-is-my-pretty-alright-password",
         password_confirmation: "this-is-my-pretty-alright-password"
       }
@@ -42,7 +42,7 @@ RSpec.describe "Users", type: :request do
       expect { post_create }.to change(User, :count).by(1)
       user = User.find(parsed_body["user"]["id"])
       expect(user.username).to eql("foobar")
-      expect(user.phone_number).to eql("+1112223333")
+      expect(user.phone_number).to eql("+12223334444")
     end
 
     it "creates a new user with confirmed = false and a confirmation token" do
