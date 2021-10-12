@@ -7,7 +7,7 @@ FactoryBot.define do
     end
 
     sequence :phone_number do |n|
-      "+1#{n.to_s.rjust(9, "0")}"
+      "+1222#{n.to_s.rjust(7, "0")}"
     end
 
     password { "my-long-password" }

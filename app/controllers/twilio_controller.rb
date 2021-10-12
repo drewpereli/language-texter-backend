@@ -5,7 +5,8 @@ class TwilioController < ApplicationController
   skip_after_action :verify_authorized
 
   def guess
-    user = User.find_by(phone_number: params["From"])
+    normalized_from_number = PhonyRails.normalize_number(params["From"], default_country_code: "US")
+    user = User.find_by(phone_number: normalized_from_number)
 
     return unless user.present?
 

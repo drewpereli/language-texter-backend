@@ -33,8 +33,8 @@ RSpec.describe Attempt, type: :model do
   describe "#correct?" do
     subject(:correct) { attempt.correct? }
 
-    let(:u1) { create(:user, username: "u1", phone_number: "abc") }
-    let(:u2) { create(:user, username: "u2", phone_number: "def") }
+    let(:u1) { create(:user, username: "u1") }
+    let(:u2) { create(:user, username: "u2") }
     let(:challenge) do
       create(:challenge, spanish_text: challenge_spanish_text, english_text: challenge_english_text, creator: u1,
                          student: u2)

@@ -7,10 +7,10 @@ RSpec.describe "Twilio", type: :request do
     subject(:post_create) { post "/twilio/guess", params: guess_params }
 
     let(:guess_params) do
-      {"Body" => request_message, "From" => student.phone_number}
+      {"Body" => request_message, "From" => "2223334444"}
     end
 
-    let!(:student) { create(:user) }
+    let!(:student) { create(:user, phone_number: "222-333-4444") }
 
     context "when there is an active question" do
       let!(:challenge) do
