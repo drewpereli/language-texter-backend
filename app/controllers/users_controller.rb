@@ -2,14 +2,17 @@
 
 class UsersController < ApplicationController
   skip_before_action :ensure_authenticated, only: %i[create login confirm]
+  skip_after_action :verify_authorized, only: %i[change_password login confirm]
 
   def index
-    @users = User.all
+    @users = policy_scope(User)
 
     render json: @users
   end
 
   def create
+    authorize(User)
+
     @user = User.create_and_send_confirmation(create_params)
 
     if @user.valid?
