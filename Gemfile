@@ -66,3 +66,5 @@ gem "whenever", require: false
 gem "pragmatic_tokenizer"
 
 gem "kaminari"
+
+gem "pundit"
