@@ -11,4 +11,5 @@ Rails.application.routes.draw do
   post "/twilio/guess", to: "twilio#guess"
 
   resources :student_teachers, only: %i[index destroy]
+  resources :student_teacher_invitations, only: %i[index create update destroy]
 end

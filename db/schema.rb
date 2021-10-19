@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_12_071439) do
+ActiveRecord::Schema.define(version: 2021_10_16_013212) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -45,6 +45,16 @@ ActiveRecord::Schema.define(version: 2021_10_12_071439) do
     t.datetime "last_sent_at"
     t.datetime "updated_at", precision: 6, null: false
     t.index ["challenge_id"], name: "index_questions_on_challenge_id"
+  end
+
+  create_table "student_teacher_invitations", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.integer "creator_id", null: false
+    t.string "recipient_name", null: false
+    t.string "recipient_phone_number", null: false
+    t.integer "requested_role", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "student_teachers", force: :cascade do |t|

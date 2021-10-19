@@ -160,4 +160,24 @@ RSpec.describe User, type: :model do
       expect(user.phone_number).to eql("+12223334444")
     end
   end
+
+  describe "#invitations_sent_within_last_week" do
+    subject(:invitations_sent_within_last_week) { user.invitations_sent_within_last_week }
+
+    let(:user) { create(:user) }
+
+    before do
+      create(:student_teacher_invitation, creator: user, created_at: 2.weeks.ago, id: 1)
+      create(:student_teacher_invitation, creator: user, created_at: 1.day.ago, id: 2)
+      create(:student_teacher_invitation, creator: user, created_at: 3.weeks.ago, id: 3)
+      create(:student_teacher_invitation, creator: user, created_at: 5.weeks.ago, id: 4)
+      create(:student_teacher_invitation, creator: user, created_at: 2.days.ago, id: 5)
+      create(:student_teacher_invitation, recipient: user, created_at: 2.days.ago, id: 6)
+      create(:student_teacher_invitation, recipient: user, created_at: 3.days.ago, id: 7)
+    end
+
+    it "includes the invitations created within the last week" do
+      expect(invitations_sent_within_last_week.ids).to match_array([2, 5])
+    end
+  end
 end

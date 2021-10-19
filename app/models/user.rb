@@ -13,6 +13,10 @@ class User < ApplicationRecord
   has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
   has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"
 
+  has_many :student_teacher_invitations_sent, class_name: "StudentTeacherInvitation", foreign_key: "creator_id"
+  has_many :student_teacher_invitations_received, class_name: "StudentTeacherInvitation",
+                                                  foreign_key: "recipient_phone_number"
+
   def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
@@ -35,6 +39,10 @@ class User < ApplicationRecord
     return nil if last_question.nil?
 
     last_question.attempted? ? nil : last_question
+  end
+
+  def invitations_sent_within_last_week
+    student_teacher_invitations_sent.where("created_at > ?", 1.week.ago)
   end
 
   def self.create_and_send_confirmation(attrs)
