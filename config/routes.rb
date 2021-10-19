@@ -9,4 +9,6 @@ Rails.application.routes.draw do
   end
   
   post "/twilio/guess", to: "twilio#guess"
+
+  resources :student_teachers, only: %i[index destroy]
 end
