@@ -53,6 +53,8 @@ RSpec.describe "StudentTeacherInvitations", type: :request do
           headers: authenticated_headers
     end
 
+    include_context "with twilio_client stub"
+
     let!(:student_teacher_invitation) { create(:student_teacher_invitation, recipient: user) }
 
     let(:update_params) do

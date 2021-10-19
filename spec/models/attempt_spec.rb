@@ -6,12 +6,12 @@ RSpec.describe Attempt, type: :model do
   describe ".create_and_process" do
     subject(:create_and_process) { described_class.create_and_process(question: question, text: "abc") }
 
+    include_context "with twilio_client stub"
+
     let(:question) { create(:question) }
 
     before do
-      create(:user, :drew)
       allow(Rails.application.credentials).to receive(:twilio).and_return({account_ssid: 123, auth_token: "abc"})
-      allow_any_instance_of(TwilioClient).to receive(:text_number).and_return(nil)
     end
 
     it "creates an attempt" do

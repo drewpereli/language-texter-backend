@@ -29,6 +29,8 @@ RSpec.describe "Users", type: :request do
   describe "POST create" do
     subject(:post_create) { post "/users", params: {user: create_params} }
 
+    include_context "with twilio_client stub"
+
     let(:create_params) do
       {
         username: "foobar",

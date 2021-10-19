@@ -43,6 +43,8 @@ RSpec.describe StudentTeacherInvitation, type: :model do
   describe ".create_and_send" do
     subject(:create_and_send) { described_class.create_and_send(params) }
 
+    include_context "with twilio_client stub"
+
     let(:user) { create(:user, username: "luther manhole") }
 
     let(:params) do
@@ -52,13 +54,6 @@ RSpec.describe StudentTeacherInvitation, type: :model do
         recipient_phone_number: "333-444-5555",
         requested_role: "teacher"
       }
-    end
-
-    let(:twilio_client) { instance_double("TwilioClient") }
-
-    before do
-      allow(twilio_client).to receive(:text_number)
-      allow(TwilioClient).to receive(:new).and_return(twilio_client)
     end
 
     it "creates a StudentTeacherInvitation model" do
@@ -76,18 +71,14 @@ RSpec.describe StudentTeacherInvitation, type: :model do
   describe "#respond_and_notify" do
     subject(:respond_and_notify) { invitation.respond_and_notify(status) }
 
+    include_context "with twilio_client stub"
+
     let(:invitation) do
       create(:student_teacher_invitation, creator: u1, recipient: u2, recipient_name: "Chaplin Crabtree")
     end
+
     let(:u1) { create(:user) }
     let(:u2) { create(:user, username: "Chaplin Crabtree") }
-
-    let(:twilio_client) { instance_double("TwilioClient") }
-
-    before do
-      allow(twilio_client).to receive(:text_number)
-      allow(TwilioClient).to receive(:new).and_return(twilio_client)
-    end
 
     context "when the invite is accepted" do
       let(:status) { "accepted" }
