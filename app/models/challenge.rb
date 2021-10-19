@@ -26,7 +26,7 @@ class Challenge < ApplicationRecord
 
     self.class.first_in_queue&.active! if self.class.need_more_active?
 
-    creator.text("#{student.username} has completed the challenge \"#{spanish_text}\"!") unless creator_id == student_id
+    creator.text(event_messages[:completed]) unless creator_id == student_id
   end
 
   def process_attempt(attempt)
@@ -49,6 +49,10 @@ class Challenge < ApplicationRecord
     question.send_message
   end
 
+  def send_creation_message
+    student.text(event_messages[:completed])
+  end
+
   class << self
     def create_and_process(attrs)
       attrs[:spanish_text] = attrs[:spanish_text]&.strip
@@ -57,9 +61,7 @@ class Challenge < ApplicationRecord
       create(attrs).tap do |challenge|
         challenge.update(status: "active") if need_more_active?
 
-        if challenge.valid?
-          challenge.student.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.")
-        end
+        challenge.send_creation_message if challenge.valid?
       end
     end
 
@@ -88,5 +90,13 @@ class Challenge < ApplicationRecord
     else
       "spanish"
     end
+  end
+
+  def event_message_variables
+    {
+      spanish_text: spanish_text.strip,
+      english_text: english_text.strip,
+      student_username: student.username
+    }
   end
 end

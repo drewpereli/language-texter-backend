@@ -54,15 +54,22 @@ class StudentTeacherInvitation < ApplicationRecord
   end
 
   def invitation_message
-    "Hey there! #{creator.username} has invited you to be their teacher at spanishtexter.com. "\
-    "Click this link to #{recipient.nil? ? "create an account" : "respond to the invitation"}! #{link}"
+    base_message = messages[:invitation_message][:base]
+
+    message_tail = if recipient.nil?
+                     messages[:invitation_message][:when_recipient_does_not_have_account]
+                   else
+                     messages[:invitation_message][:when_recipient_has_account]
+                   end
+
+    "#{base_message} #{message_tail}"
   end
 
   def response_message
     if accepted?
-      "#{recipient_name} accepted your invitation!"
+      messages[:response_message][:accepted]
     elsif rejected?
-      "#{recipient_name} rejected your invitation."
+      messages[:response_message][:rejected]
     end
   end
 
@@ -86,5 +93,13 @@ class StudentTeacherInvitation < ApplicationRecord
 
   def twilio_client
     @twilio_client ||= TwilioClient.new
+  end
+
+  def messages
+    I18n.t("event_messages.student_teacher_invitations", deep_interpolation: true,
+                                                         creator_username: creator.username,
+                                                         requested_role: requested_role,
+                                                         link: link,
+                                                         recipient_name: recipient_name)
   end
 end

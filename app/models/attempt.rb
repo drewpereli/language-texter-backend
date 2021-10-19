@@ -30,21 +30,19 @@ class Attempt < ApplicationRecord
   def response_message
     case result_status
     when "incorrect_active"
-      "Estas equivocado, idiota. The correct answer is '#{question.correct_text}'."
+      event_messages[:incorrect_active]
     when "correct_active_insufficient"
       if challenge.correct_attempts_still_required == 1
-        "Good job, that's correct! You only need 1 more correct guess to complete this challenge!"
+        event_messages[:correct_active_insufficient_1_more_required]
       else
-        "Good job, that's correct! " \
-            "#{challenge.correct_attempts_still_required} more correct guesses " \
-            "in a row needed to complete this challenge."
+        event_messages[:correct_active_insufficient]
       end
     when "correct_active_sufficient"
-      "Good job, that's correct! You've completed this challenge!"
+      event_messages[:correct_active_sufficient]
     when "incorrect_complete"
-      "That's incorrect. This challenge has been reactivated."
+      event_messages[:incorrect_complete]
     when "correct_complete"
-      "That's correct. Looks like you still know this one"
+      event_messages[:correct_complete]
     end
   end
 
@@ -97,5 +95,14 @@ class Attempt < ApplicationRecord
       attempt.challenge.process_attempt(attempt)
       attempt.question.student.text(attempt.response_message)
     end
+  end
+
+  private
+
+  def event_message_variables
+    {
+      correct_text: question.correct_text,
+      correct_attempts_still_required: challenge.correct_attempts_still_required
+    }
   end
 end

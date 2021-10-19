@@ -15,12 +15,16 @@ class Question < ApplicationRecord
   end
 
   def resend_message
-    twilio_client.text_number(student.phone_number, "Respond you americano ignorante. #{message}")
+    twilio_client.text_number(student.phone_number, reminder_message)
     update(last_sent_at: Time.now)
   end
 
   def message
     [message_challenge_portion, message_note_portion].compact.join(" ")
+  end
+
+  def reminder_message
+    "#{event_messages[:reminder_base]} #{message}"
   end
 
   def correct_text
@@ -61,17 +65,26 @@ class Question < ApplicationRecord
 
   def message_challenge_portion
     if spanish?
-      "What does '#{challenge.spanish_text.strip}' mean?"
+      event_messages[:spanish_challenge]
     else
-      "How do you say '#{challenge.english_text.strip}' in spanish?"
+      event_messages[:english_challenge]
     end
   end
 
   def message_note_portion
     if spanish? && challenge.spanish_text_note.present?
-      "(Note: #{challenge.spanish_text_note})"
+      event_messages[:spanish_note]
     elsif english? && challenge.english_text_note.present?
-      "(Note: #{challenge.english_text_note})"
+      event_messages[:english_note]
     end
+  end
+
+  def event_message_variables
+    {
+      spanish_text: challenge.spanish_text.strip,
+      english_text: challenge.english_text.strip,
+      spanish_note: challenge.spanish_text_note,
+      english_note: challenge.english_text_note
+    }
   end
 end
