@@ -6,4 +6,12 @@ class StudentTeacher < ApplicationRecord
 
   validates :student, :teacher, presence: true
   validates :student, uniqueness: {scope: :teacher}
+  validate :validate_student_is_not_teacher
+
+  def validate_student_is_not_teacher
+    return unless student.id == teacher.id
+
+    errors.add(:base,
+               "Student and teacher cannot be the same")
+  end
 end
