@@ -238,4 +238,38 @@ RSpec.describe User, type: :model do
       expect(teachers.ids).to match_array([t1.id, t2.id, t3.id])
     end
   end
+
+  describe "#inviters" do
+    subject(:inviters) { user.inviters }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:inviter_1) { create(:user, id: 2) }
+    let!(:inviter_2) { create(:user, id: 3) }
+    let!(:inviter_3) { create(:user, id: 4) }
+    let!(:invitee_1) { create(:user, id: 5) }
+    let!(:invitee_2) { create(:user, id: 6) }
+    let!(:invitee_3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher_invitation, creator: inviter_1, recipient: user)
+      create(:student_teacher_invitation, creator: inviter_2, recipient: user)
+      create(:student_teacher_invitation, creator: inviter_3, recipient: user)
+
+      create(:student_teacher_invitation, creator: user, recipient: invitee_1)
+      create(:student_teacher_invitation, creator: user, recipient: invitee_2)
+      create(:student_teacher_invitation, creator: user, recipient: invitee_3)
+    end
+
+    it "returns the inviters" do
+      expect(inviters.ids).to match_array([
+        inviter_1.id,
+        inviter_2.id,
+        inviter_3.id
+      ])
+    end
+  end
 end

@@ -15,7 +15,10 @@ class User < ApplicationRecord
 
   has_many :student_teacher_invitations_sent, class_name: "StudentTeacherInvitation", foreign_key: "creator_id"
   has_many :student_teacher_invitations_received, class_name: "StudentTeacherInvitation",
-                                                  foreign_key: "recipient_phone_number"
+                                                  foreign_key: "recipient_phone_number",
+                                                  primary_key: "phone_number"
+
+  has_many :inviters, through: :student_teacher_invitations_received, source: :creator
 
   has_many :student_teachers_where_student, class_name: "StudentTeacher", foreign_key: "student_id"
   has_many :student_teachers_where_teacher, class_name: "StudentTeacher", foreign_key: "teacher_id"
