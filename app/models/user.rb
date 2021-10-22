@@ -17,6 +17,12 @@ class User < ApplicationRecord
   has_many :student_teacher_invitations_received, class_name: "StudentTeacherInvitation",
                                                   foreign_key: "recipient_phone_number"
 
+  has_many :student_teachers_where_student, class_name: "StudentTeacher", foreign_key: "student_id"
+  has_many :student_teachers_where_teacher, class_name: "StudentTeacher", foreign_key: "teacher_id"
+
+  has_many :students, through: :student_teachers_where_teacher
+  has_many :teachers, through: :student_teachers_where_student
+
   def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end

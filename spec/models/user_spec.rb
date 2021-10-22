@@ -180,4 +180,62 @@ RSpec.describe User, type: :model do
       expect(invitations_sent_within_last_week.ids).to match_array([2, 5])
     end
   end
+
+  describe "#students" do
+    subject(:students) { user.students }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:s1) { create(:user, id: 2) }
+    let!(:s2) { create(:user, id: 3) }
+    let!(:s3) { create(:user, id: 4) }
+    let!(:t1) { create(:user, id: 5) }
+    let!(:t2) { create(:user, id: 6) }
+    let!(:t3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher, teacher: user, student: s1)
+      create(:student_teacher, teacher: user, student: s2)
+      create(:student_teacher, teacher: user, student: s3)
+      create(:student_teacher, student: user, teacher: t1)
+      create(:student_teacher, student: user, teacher: t2)
+      create(:student_teacher, student: user, teacher: t3)
+    end
+
+    it "returns the students" do
+      expect(students.ids).to match_array([s1.id, s2.id, s3.id])
+    end
+  end
+
+  describe "#teachers" do
+    subject(:teachers) { user.teachers }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:s1) { create(:user, id: 2) }
+    let!(:s2) { create(:user, id: 3) }
+    let!(:s3) { create(:user, id: 4) }
+    let!(:t1) { create(:user, id: 5) }
+    let!(:t2) { create(:user, id: 6) }
+    let!(:t3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher, teacher: user, student: s1)
+      create(:student_teacher, teacher: user, student: s2)
+      create(:student_teacher, teacher: user, student: s3)
+      create(:student_teacher, student: user, teacher: t1)
+      create(:student_teacher, student: user, teacher: t2)
+      create(:student_teacher, student: user, teacher: t3)
+    end
+
+    it "returns the teachers" do
+      expect(teachers.ids).to match_array([t1.id, t2.id, t3.id])
+    end
+  end
 end
