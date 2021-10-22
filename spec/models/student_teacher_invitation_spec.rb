@@ -40,31 +40,20 @@ RSpec.describe StudentTeacherInvitation, type: :model do
     end
   end
 
-  describe ".create_and_send" do
-    subject(:create_and_send) { described_class.create_and_send(params) }
+  describe "#send_invitation_message" do
+    subject(:send_invitation_message) { invitation.send_invitation_message }
 
     include_context "with twilio_client stub"
 
+    let(:invitation) { create(:student_teacher_invitation, recipient: user, requested_role: "teacher") }
+
     let(:user) { create(:user, username: "luther manhole") }
 
-    let(:params) do
-      {
-        creator: user,
-        recipient_name: "my recipient",
-        recipient_phone_number: "333-444-5555",
-        requested_role: "teacher"
-      }
-    end
-
-    it "creates a StudentTeacherInvitation model" do
-      expect { create_and_send }.to change(described_class, :count).by(1)
-    end
-
     it "texts the recipient" do
-      create_and_send
+      send_invitation_message
       expect(twilio_client).to have_received(:text_number)
-                                 .with("+13334445555",
-                                       /^Hey there! luther manhole has invited you to be their teacher at/)
+                                 .with(user.phone_number,
+                                       /^Hey there! [\w\W]+ has invited you to be their teacher at/)
     end
   end
 

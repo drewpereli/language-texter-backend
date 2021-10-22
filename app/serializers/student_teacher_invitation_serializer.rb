@@ -2,13 +2,20 @@
 
 class StudentTeacherInvitationSerializer < ActiveModel::Serializer
   attributes :id,
-             :creator_username,
+             :recipient_id,
              :recipient_name,
              :recipient_phone_number,
+             :creator_id,
+             :creator_username,
              :requested_role,
-             :status
+             :status,
+             :created_at
 
   def creator_username
     object.creator.username
+  end
+
+  def recipient_id
+    object.recipient&.id
   end
 end

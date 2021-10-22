@@ -15,6 +15,7 @@ class StudentTeacherInvitationsController < ApplicationController
     authorize(@invitation)
 
     if @invitation.save
+      @invitation.send_invitation_message
       render json: @invitation, status: :created, location: @invitation
     else
       render json: @invitation.errors, status: :unprocessable_entity

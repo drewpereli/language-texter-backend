@@ -4,6 +4,7 @@ require "rails_helper"
 
 RSpec.describe "StudentTeacherInvitations", type: :request do
   include_context "with authenticated_headers"
+  include_context "with twilio_client stub"
 
   let(:user) { create(:user) }
 
@@ -44,6 +45,11 @@ RSpec.describe "StudentTeacherInvitations", type: :request do
     it "creates a new StudentTeacherInvitation" do
       expect { post_create }.to change(StudentTeacherInvitation, :count).by(1)
     end
+
+    it "texts the recipient" do
+      post_create
+      expect(twilio_client).to have_received(:text_number).with("+18883334444", String)
+    end
   end
 
   describe "PUT update" do
@@ -65,6 +71,11 @@ RSpec.describe "StudentTeacherInvitations", type: :request do
       put_update
       student_teacher_invitation.reload
       expect(student_teacher_invitation).to be_rejected
+    end
+
+    it "texts the creator" do
+      put_update
+      expect(twilio_client).to have_received(:text_number).with(student_teacher_invitation.creator.phone_number, String)
     end
   end
 

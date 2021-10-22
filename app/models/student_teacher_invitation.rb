@@ -41,12 +41,6 @@ class StudentTeacherInvitation < ApplicationRecord
     twilio_client.text_number(recipient_phone_number, invitation_message)
   end
 
-  def self.create_and_send(attrs)
-    create(attrs).tap do |invitation|
-      invitation.send_invitation_message if invitation.valid?
-    end
-  end
-
   private
 
   def send_response_message
