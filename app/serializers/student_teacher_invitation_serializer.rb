@@ -16,6 +16,8 @@ class StudentTeacherInvitationSerializer < ActiveModel::Serializer
   end
 
   def recipient_id
-    object.recipient&.id
+    return nil if object.recipient.nil? || object.recipient.id != current_user.id
+
+    object.recipient.id
   end
 end
