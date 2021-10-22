@@ -3,7 +3,7 @@
 class UserPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
-      scope.all
+      scope.where(id: [user, *user.inviters, *user.students, *user.teachers])
     end
   end
 
