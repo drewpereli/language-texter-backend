@@ -18,7 +18,7 @@ class StudentTeacherInvitationsController < ApplicationController
       @invitation.send_invitation_message
       render json: @invitation, status: :created, location: @invitation
     else
-      render json: @invitation.errors, status: :unprocessable_entity
+      render_model_errors(@invitation)
     end
   end
 
@@ -30,7 +30,7 @@ class StudentTeacherInvitationsController < ApplicationController
     if @invitation.valid?
       render json: @invitation
     else
-      render json: @invitation.errors, status: :unprocessable_entity
+      render_model_errors(@invitation)
     end
   end
 
