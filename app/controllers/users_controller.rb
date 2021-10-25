@@ -2,7 +2,7 @@
 
 class UsersController < ApplicationController
   skip_before_action :ensure_authenticated, only: %i[create login confirm]
-  skip_after_action :verify_authorized, only: %i[change_password login confirm]
+  skip_after_action :verify_authorized, only: %i[me change_password login confirm]
 
   def index
     @users = policy_scope(User)
@@ -20,6 +20,10 @@ class UsersController < ApplicationController
     else
       render json: {errors: @user.errors}, status: :unauthorized
     end
+  end
+
+  def me
+    render json: current_user
   end
 
   def change_password
@@ -48,7 +52,7 @@ class UsersController < ApplicationController
       render json: {errors: "You haven't confirmed your account yet"}, status: :unauthorized
     else
       token = @user.jwt_token
-      render json: {user: {id: @user.id, username: @user.username}, token: token}
+      render json: {token: token}
     end
   end
 
