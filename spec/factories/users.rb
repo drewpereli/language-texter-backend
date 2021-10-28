@@ -12,5 +12,9 @@ FactoryBot.define do
 
     password { "my-long-password" }
     password_confirmation { "my-long-password" }
+
+    after(:create) do |user|
+      create(:user_settings, user: user)
+    end
   end
 end

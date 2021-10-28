@@ -56,6 +56,12 @@ class User < ApplicationRecord
     student_teacher_invitations_sent.where("created_at > ?", 1.week.ago)
   end
 
+  def appropriate_time_for_text?
+    current_hour = Time.now.in_time_zone(user_settings.timezone).strftime("%H").to_i
+
+    current_hour >= 8 && current_hour < 23
+  end
+
   def self.create_and_send_confirmation(attrs)
     user = new(attrs.except(:timezone))
 

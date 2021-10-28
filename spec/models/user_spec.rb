@@ -310,4 +310,39 @@ RSpec.describe User, type: :model do
                                                                 /^Please click this link to confirm your account/)
     end
   end
+
+  describe "appropriate_time_for_text?" do
+    subject(:appropriate_time_for_text?) { user.appropriate_time_for_text? }
+
+    let(:user) { create(:user) }
+
+    let(:timezone) { Faker::Address.time_zone }
+
+    let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
+    let(:hour_now) { 12 }
+    let(:minute_now) { 0 }
+
+    before do
+      allow(Time).to receive(:now).and_return(time_now)
+
+      user.user_settings.timezone = timezone
+    end
+
+    context "when it is after 11 pm" do
+      let(:hour_now) { 23 }
+      let(:minute_now) { 30 }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it is before 8 am" do
+      let(:hour_now) { 7 }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it is between 8 and 11" do
+      it { is_expected.to be_truthy }
+    end
+  end
 end
