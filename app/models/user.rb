@@ -26,6 +26,8 @@ class User < ApplicationRecord
   has_many :students, through: :student_teachers_where_teacher
   has_many :teachers, through: :student_teachers_where_student
 
+  has_one :user_settings
+
   def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
