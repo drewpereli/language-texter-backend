@@ -6,6 +6,8 @@ RSpec.describe "Twilio", type: :request do
   describe "POST /guess" do
     subject(:post_create) { post "/twilio/guess", params: guess_params }
 
+    include_context "with twilio_client stub"
+
     let(:guess_params) do
       {"Body" => request_message, "From" => "2223334444"}
     end
@@ -26,22 +28,24 @@ RSpec.describe "Twilio", type: :request do
       end
 
       shared_examples "it creates an attempt with the correct result status and texts a response" do |params|
-        it "creates an attempt with the correct status and texts a response" do
-          if params[:should_text_creator]
-            allow_any_instance_of(TwilioClient).to receive(:text_number).and_return(nil)
-          else
-            expect_any_instance_of(TwilioClient).to receive(:text_number).with(student.phone_number,
-                                                                               /\w+/).and_return(nil)
-          end
-
+        it "creates an attempt with the correct status" do
           expect { post_create }.to change(Attempt, :count).by(1)
           expect(Attempt.last.result_status).to eql(params[:expected_status])
+        end
+
+        it "texts a response" do
+          post_create
+
+          if params[:should_text_creator]
+            expect(twilio_client).to have_received(:text_number).with(creator.phone_number, String)
+          else
+            expect(twilio_client).to have_received(:text_number).with(student.phone_number, String)
+          end
         end
       end
 
       shared_examples "the challenge ends up with the correct status" do |params|
         it "ends up with the correct challenge status" do
-          allow_any_instance_of(TwilioClient).to receive(:text_number).and_return(nil)
           post_create
           expect(Challenge.find(params[:challenge_id]).status).to eql(params[:expected_status])
         end

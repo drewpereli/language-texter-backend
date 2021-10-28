@@ -41,6 +41,8 @@ RSpec.describe "Challenges", type: :request do
   describe "POST create" do
     subject(:post_create) { post "/challenges", params: {challenge: create_params}, headers: authenticated_headers }
 
+    include_context "with twilio_client stub"
+
     let(:student) { create(:user) }
 
     let(:create_params) do

@@ -45,6 +45,8 @@ RSpec.describe Challenge, type: :model do
   describe "#mark_as_complete" do
     subject(:mark_as_complete) { challenge.mark_as_complete }
 
+    include_context "with twilio_client stub"
+
     let(:challenge) { create(:challenge) }
 
     it "updates the challenge status and texts christina" do
@@ -63,14 +65,15 @@ RSpec.describe Challenge, type: :model do
     context "when more challenges need to be activated" do
       let!(:queued) { create(:challenge, status: "queued") }
 
-      before do
-        allow_any_instance_of(User).to receive(:text).and_return(nil)
-      end
-
       it "activates the last queued challenge" do
         mark_as_complete
         queued.reload
         expect(queued).to be_active
+      end
+
+      it "texts the creator" do
+        mark_as_complete
+        expect(twilio_client).to have_received(:text_number).with(challenge.creator.phone_number, String)
       end
     end
 
@@ -79,7 +82,6 @@ RSpec.describe Challenge, type: :model do
 
       before do
         create_list(:challenge, Challenge::MAX_ACTIVE + 10, status: "active")
-        allow_any_instance_of(User).to receive(:text).and_return(nil)
       end
 
       it "does not activate the last queued challenge" do
@@ -87,11 +89,18 @@ RSpec.describe Challenge, type: :model do
         queued.reload
         expect(queued).to be_queued
       end
+
+      it "texts the creator" do
+        mark_as_complete
+        expect(twilio_client).to have_received(:text_number).with(challenge.creator.phone_number, String)
+      end
     end
   end
 
   describe ".create_and_process" do
     subject(:create_and_process) { described_class.create_and_process(attrs) }
+
+    include_context "with twilio_client stub"
 
     let(:student) { create(:user) }
     let(:creator) { create(:user) }
@@ -100,18 +109,14 @@ RSpec.describe Challenge, type: :model do
       {spanish_text: "foo", english_text: "bar", student: student, creator: creator}
     end
 
-    before do
-      allow_any_instance_of(User).to receive(:text).and_return(nil)
-    end
-
     context "when attrs are all valid" do
       it "creates a challenge" do
         expect { create_and_process }.to change(described_class, :count).by(1)
       end
 
       it "texts the student" do
-        expect_any_instance_of(User).to receive(:text)
         create_and_process
+        expect(twilio_client).to have_received(:text_number).with(student.phone_number, String)
       end
     end
 
@@ -137,7 +142,7 @@ RSpec.describe Challenge, type: :model do
         expect { create_and_process }.to change(described_class, :count).by(0)
       end
 
-      it "doesn't text drew" do
+      it "doesn't text the student" do
         expect_any_instance_of(User).not_to receive(:text)
         create_and_process
       end
@@ -166,6 +171,8 @@ RSpec.describe Challenge, type: :model do
 
   describe "#process_attempt" do
     subject(:process_attempt) { challenge.process_attempt(attempt) }
+
+    include_context "with twilio_client stub"
 
     let(:challenge) { create(:challenge) }
 

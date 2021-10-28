@@ -38,4 +38,8 @@ class ApplicationController < ActionController::API
   def ensure_authenticated
     render json: {message: "Please log in"}, status: :unauthorized unless logged_in?
   end
+
+  def render_model_errors(model)
+    render json: {errors: model.errors}, status: :unprocessable_entity
+  end
 end

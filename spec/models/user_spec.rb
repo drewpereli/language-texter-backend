@@ -160,4 +160,116 @@ RSpec.describe User, type: :model do
       expect(user.phone_number).to eql("+12223334444")
     end
   end
+
+  describe "#invitations_sent_within_last_week" do
+    subject(:invitations_sent_within_last_week) { user.invitations_sent_within_last_week }
+
+    let(:user) { create(:user) }
+
+    before do
+      create(:student_teacher_invitation, creator: user, created_at: 2.weeks.ago, id: 1)
+      create(:student_teacher_invitation, creator: user, created_at: 1.day.ago, id: 2)
+      create(:student_teacher_invitation, creator: user, created_at: 3.weeks.ago, id: 3)
+      create(:student_teacher_invitation, creator: user, created_at: 5.weeks.ago, id: 4)
+      create(:student_teacher_invitation, creator: user, created_at: 2.days.ago, id: 5)
+      create(:student_teacher_invitation, recipient: user, created_at: 2.days.ago, id: 6)
+      create(:student_teacher_invitation, recipient: user, created_at: 3.days.ago, id: 7)
+    end
+
+    it "includes the invitations created within the last week" do
+      expect(invitations_sent_within_last_week.ids).to match_array([2, 5])
+    end
+  end
+
+  describe "#students" do
+    subject(:students) { user.students }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:s1) { create(:user, id: 2) }
+    let!(:s2) { create(:user, id: 3) }
+    let!(:s3) { create(:user, id: 4) }
+    let!(:t1) { create(:user, id: 5) }
+    let!(:t2) { create(:user, id: 6) }
+    let!(:t3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher, teacher: user, student: s1)
+      create(:student_teacher, teacher: user, student: s2)
+      create(:student_teacher, teacher: user, student: s3)
+      create(:student_teacher, student: user, teacher: t1)
+      create(:student_teacher, student: user, teacher: t2)
+      create(:student_teacher, student: user, teacher: t3)
+    end
+
+    it "returns the students" do
+      expect(students.ids).to match_array([s1.id, s2.id, s3.id])
+    end
+  end
+
+  describe "#teachers" do
+    subject(:teachers) { user.teachers }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:s1) { create(:user, id: 2) }
+    let!(:s2) { create(:user, id: 3) }
+    let!(:s3) { create(:user, id: 4) }
+    let!(:t1) { create(:user, id: 5) }
+    let!(:t2) { create(:user, id: 6) }
+    let!(:t3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher, teacher: user, student: s1)
+      create(:student_teacher, teacher: user, student: s2)
+      create(:student_teacher, teacher: user, student: s3)
+      create(:student_teacher, student: user, teacher: t1)
+      create(:student_teacher, student: user, teacher: t2)
+      create(:student_teacher, student: user, teacher: t3)
+    end
+
+    it "returns the teachers" do
+      expect(teachers.ids).to match_array([t1.id, t2.id, t3.id])
+    end
+  end
+
+  describe "#inviters" do
+    subject(:inviters) { user.inviters }
+
+    let(:user) { create(:user, id: 1) }
+
+    let!(:inviter_1) { create(:user, id: 2) }
+    let!(:inviter_2) { create(:user, id: 3) }
+    let!(:inviter_3) { create(:user, id: 4) }
+    let!(:invitee_1) { create(:user, id: 5) }
+    let!(:invitee_2) { create(:user, id: 6) }
+    let!(:invitee_3) { create(:user, id: 7) }
+    let!(:n1) { create(:user, id: 8) }
+    let!(:n2) { create(:user, id: 9) }
+    let!(:n3) { create(:user, id: 10) }
+
+    before do
+      create(:student_teacher_invitation, creator: inviter_1, recipient: user)
+      create(:student_teacher_invitation, creator: inviter_2, recipient: user)
+      create(:student_teacher_invitation, creator: inviter_3, recipient: user)
+
+      create(:student_teacher_invitation, creator: user, recipient: invitee_1)
+      create(:student_teacher_invitation, creator: user, recipient: invitee_2)
+      create(:student_teacher_invitation, creator: user, recipient: invitee_3)
+    end
+
+    it "returns the inviters" do
+      expect(inviters.ids).to match_array([
+        inviter_1.id,
+        inviter_2.id,
+        inviter_3.id
+      ])
+    end
+  end
 end

@@ -16,18 +16,16 @@ RSpec.describe "Users", type: :request do
       parsed_body["users"].map { |record| record["id"] }
     end
 
-    before do
-      create_list(:user, 10)
-    end
-
     it "responds with the User records " do
       get_index
-      expect(response_ids).to match_array(User.ids)
+      expect(response_ids).to match_array([user.id])
     end
   end
 
   describe "POST create" do
     subject(:post_create) { post "/users", params: {user: create_params} }
+
+    include_context "with twilio_client stub"
 
     let(:create_params) do
       {
@@ -70,7 +68,6 @@ RSpec.describe "Users", type: :request do
 
       it "responds with a token" do
         post_login
-        expect(parsed_body["user"]["id"]).to eql(user.id)
         expect(parsed_body["token"]).to eql(user.jwt_token)
       end
     end

@@ -32,7 +32,7 @@ class ChallengesController < ApplicationController
     if @challenge.valid?
       render json: @challenge
     else
-      render json: @challenge.errors, status: :unprocessable_entity
+      render_model_errors(@challenge)
     end
   end
 
@@ -43,7 +43,7 @@ class ChallengesController < ApplicationController
     if @challenge.update(challenge_params)
       render json: @challenge
     else
-      render json: @challenge.errors, status: :unprocessable_entity
+      render_model_errors(@challenge)
     end
   end
 
