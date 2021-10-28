@@ -272,4 +272,42 @@ RSpec.describe User, type: :model do
       ])
     end
   end
+
+  describe ".create_and_send_confirmation" do
+    subject(:create_and_send_confirmation) { described_class.create_and_send_confirmation(attrs) }
+
+    include_context "with twilio_client stub"
+
+    let(:attrs) do
+      password = "#{Faker::Internet.password(min_length: 12, mix_case: true)}1"
+
+      {
+        username: Faker::Internet.username,
+        phone_number: "222-333-4444",
+        password: password,
+        password_confirmation: password,
+        timezone: Faker::Address.time_zone
+      }
+    end
+
+    it "creates a user" do
+      expect { create_and_send_confirmation }.to change(described_class, :count).by(1)
+    end
+
+    it "creates a user settings model" do
+      expect { create_and_send_confirmation }.to change(UserSettings, :count).by(1)
+    end
+
+    it "assigns the settings model to the user" do
+      user = create_and_send_confirmation
+
+      expect(user.user_settings).not_to be_nil
+    end
+
+    it "sends a confirmation link to the user" do
+      create_and_send_confirmation
+      expect(twilio_client).to have_received(:text_number).with("+12223334444",
+                                                                /^Please click this link to confirm your account/)
+    end
+  end
 end

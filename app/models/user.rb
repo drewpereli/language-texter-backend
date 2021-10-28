@@ -57,16 +57,24 @@ class User < ApplicationRecord
   end
 
   def self.create_and_send_confirmation(attrs)
-    create(attrs).tap do |user|
-      break user unless user.persisted?
+    user = new(attrs.except(:timezone))
 
-      front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+    return user unless attrs[:timezone].present?
 
-      url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+    user.save
 
-      message = "Please click this link to confirm your account. #{url}"
+    return user unless user.persisted?
 
-      user.text(message)
-    end
+    UserSettings.create(user: user, timezone: attrs[:timezone])
+
+    front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+
+    url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+
+    message = "Please click this link to confirm your account. #{url}"
+
+    user.text(message)
+
+    user
   end
 end

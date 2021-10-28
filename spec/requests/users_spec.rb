@@ -32,7 +32,8 @@ RSpec.describe "Users", type: :request do
         username: "foobar",
         phone_number: "+12223334444",
         password: "this-is-my-pretty-alright-password",
-        password_confirmation: "this-is-my-pretty-alright-password"
+        password_confirmation: "this-is-my-pretty-alright-password",
+        timezone: Faker::Address.time_zone
       }
     end
 
@@ -49,6 +50,21 @@ RSpec.describe "Users", type: :request do
       expect(user.confirmed).to be_falsey
       expect(user.confirmation_token).to be_a(String)
       expect(user.confirmation_token.length).to be >= 24
+    end
+
+    context "when timezone is missing" do
+      let(:create_params) do
+        {
+          username: "foobar",
+          phone_number: "+12223334444",
+          password: "this-is-my-pretty-alright-password",
+          password_confirmation: "this-is-my-pretty-alright-password"
+        }
+      end
+
+      it "does not create a user" do
+        expect { post_create }.to change(User, :count).by(0)
+      end
     end
   end
 

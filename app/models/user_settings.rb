@@ -5,6 +5,6 @@ class UserSettings < ApplicationRecord
 
   belongs_to :user
 
-  validates :timezone, :user_id, presence: true
+  validates :timezone, :user, presence: true
   validates_uniqueness_of :user_id
 end
