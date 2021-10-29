@@ -20,5 +20,5 @@
 # Learn more: http://github.com/javan/whenever
 
 every 1.minute do
-  runner "Inquisitor.send_text_if_time"
+  runner "User.send_questions_if_time"
 end

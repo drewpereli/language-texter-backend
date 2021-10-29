@@ -125,4 +125,8 @@ class User < ApplicationRecord
 
     user
   end
+
+  def self.send_questions_if_time
+    find_each(&:send_question_if_time)
+  end
 end
