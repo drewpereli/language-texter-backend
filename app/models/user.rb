@@ -13,6 +13,8 @@ class User < ApplicationRecord
   has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
   has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"
 
+  has_many :questions_assigned, through: :challenges_assigned, source: :questions
+
   has_many :student_teacher_invitations_sent, class_name: "StudentTeacherInvitation", foreign_key: "creator_id"
   has_many :student_teacher_invitations_received, class_name: "StudentTeacherInvitation",
                                                   foreign_key: "recipient_phone_number",

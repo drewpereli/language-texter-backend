@@ -311,7 +311,7 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe "appropriate_time_for_text?" do
+  describe "#appropriate_time_for_text?" do
     subject(:appropriate_time_for_text?) { user.appropriate_time_for_text? }
 
     let(:user) { create(:user) }
@@ -343,6 +343,33 @@ RSpec.describe User, type: :model do
 
     context "when it is between 8 and 11" do
       it { is_expected.to be_truthy }
+    end
+  end
+
+  describe "#questions_assigned" do
+    subject(:questions_assigned) { user.questions_assigned }
+
+    let(:user) { create(:user) }
+
+    let!(:c1) { create(:challenge, student: user) }
+    let!(:c2) { create(:challenge, student: user) }
+    let!(:c3) { create(:challenge, student: user) }
+
+    let!(:c4) { create(:challenge, creator: user) }
+
+    let!(:c1_q1) { create(:question, challenge: c1, id: 1) }
+    let!(:c2_q1) { create(:question, challenge: c2, id: 2) }
+    let!(:c2_q2) { create(:question, challenge: c2, id: 3) }
+    let!(:c3_q1) { create(:question, challenge: c3, id: 4) }
+
+    let(:c4_q1) { create(:question, challenge: c4) }
+
+    before do
+      create_list(:question, 10)
+    end
+
+    it "returns the user's assigned questions" do
+      expect(questions_assigned.ids).to match_array([1, 2, 3, 4])
     end
   end
 end
