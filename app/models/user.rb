@@ -64,6 +64,16 @@ class User < ApplicationRecord
     current_hour >= 8 && current_hour < 23
   end
 
+  def last_question
+    questions_assigned.order(created_at: :desc).first
+  end
+
+  def last_question_waiting_on_attempt?
+    return false unless last_question
+
+    !last_question.attempted?
+  end
+
   def self.create_and_send_confirmation(attrs)
     user = new(attrs.except(:timezone))
 

@@ -372,4 +372,73 @@ RSpec.describe User, type: :model do
       expect(questions_assigned.ids).to match_array([1, 2, 3, 4])
     end
   end
+
+  describe "#last_question" do
+    subject(:last_question) { user.last_question }
+
+    let(:user) { create(:user) }
+
+    let!(:c1) { create(:challenge, student: user) }
+    let!(:c2) { create(:challenge, student: user) }
+    let!(:c3) { create(:challenge, student: user) }
+
+    let!(:c4) { create(:challenge, creator: user) }
+
+    let!(:c1_q1) { create(:question, challenge: c1, id: 1) }
+    let!(:c2_q1) { create(:question, challenge: c2, id: 2) }
+    let!(:c2_q2) { create(:question, challenge: c2, id: 3) }
+    let!(:c3_q1) { create(:question, challenge: c3, id: 4) }
+
+    let(:c4_q1) { create(:question, challenge: c4) }
+
+    before do
+      create_list(:question, 10)
+    end
+
+    it "returns the last question sent" do
+      expect(last_question.id).to be(4)
+    end
+  end
+
+  describe "#last_question_waiting_on_attempt?" do
+    subject(:last_question_waiting_on_attempt?) { user.last_question_waiting_on_attempt? }
+
+    let(:user) { create(:user) }
+
+    context "when there are no challenges" do
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges but no questions" do
+      before { create(:challenge, student: user) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges and questions, but all the questions have responses" do
+      before do
+        challenge = create(:challenge, student: user)
+
+        question = create(:question, challenge: challenge)
+
+        create(:attempt, :correct, question: question)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges and questions, but the last questions does not have a response" do
+      before do
+        challenge = create(:challenge, student: user)
+
+        question = create(:question, challenge: challenge)
+
+        create(:attempt, :correct, question: question)
+
+        create(:question, challenge: challenge)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+  end
 end
