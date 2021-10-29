@@ -30,6 +30,19 @@ class User < ApplicationRecord
 
   has_one :user_settings
 
+  TIME_FOR_NEW_QUESTION_PROBABILITY = 0.1
+  SEND_OLD_CHALLENGE_PROBABILITY = 0.1
+
+  def send_question_if_time
+    return unless appropriate_time_for_text?
+
+    if last_question_waiting_on_attempt?
+      last_question.resend_message if last_question.needs_reminder?
+    elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
+      next_challenge&.create_and_send_question
+    end
+  end
+
   def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
   end
@@ -72,6 +85,23 @@ class User < ApplicationRecord
     return false unless last_question
 
     !last_question.attempted?
+  end
+
+  def next_challenge
+    active_count = challenges_assigned.active.count
+    complete_count = challenges_assigned.complete.count
+
+    return nil if active_count.zero? && complete_count.zero?
+
+    if (rand < SEND_OLD_CHALLENGE_PROBABILITY && complete_count.positive?) || active_count.zero?
+      challenges_assigned.complete.sample
+    elsif last_question.present? && active_count > 1
+      last_challenge = last_question.challenge
+
+      challenges_assigned.active.where.not(id: last_challenge.id).sample
+    else
+      challenges_assigned.active.sample
+    end
   end
 
   def self.create_and_send_confirmation(attrs)
