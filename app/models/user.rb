@@ -39,7 +39,7 @@ class User < ApplicationRecord
     if last_question_waiting_on_attempt?
       last_question.send_reminder if last_question.needs_reminder?
     elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
-      next_challenge&.create_and_send_question
+      next_challenge&.new_question
     end
   end
 
