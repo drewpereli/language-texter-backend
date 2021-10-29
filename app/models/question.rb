@@ -9,6 +9,8 @@ class Question < ApplicationRecord
 
   has_one :attempt, dependent: :destroy
 
+  REMINDER_DELAY = 1.hour
+
   def send_message
     twilio_client.text_number(student.phone_number, message)
     update(last_sent_at: Time.now)
@@ -53,6 +55,10 @@ class Question < ApplicationRecord
 
   def attempted?
     attempt.present?
+  end
+
+  def needs_reminder?
+    !attempted? && time_since_last_sent > REMINDER_DELAY
   end
 
   def self.current_active
