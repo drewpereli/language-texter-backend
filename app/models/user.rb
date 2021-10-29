@@ -37,7 +37,7 @@ class User < ApplicationRecord
     return unless appropriate_time_for_text?
 
     if last_question_waiting_on_attempt?
-      last_question.resend_message if last_question.needs_reminder?
+      last_question.send_reminder if last_question.needs_reminder?
     elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
       next_challenge&.create_and_send_question
     end

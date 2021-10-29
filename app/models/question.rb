@@ -16,7 +16,7 @@ class Question < ApplicationRecord
     update(last_sent_at: Time.now)
   end
 
-  def resend_message
+  def send_reminder
     twilio_client.text_number(student.phone_number, reminder_message)
     update(last_sent_at: Time.now)
   end
