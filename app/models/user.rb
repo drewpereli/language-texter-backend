@@ -13,6 +13,8 @@ class User < ApplicationRecord
   has_many :challenges_assigned, class_name: "Challenge", foreign_key: "student_id"
   has_many :challenges_created, class_name: "Challenge", foreign_key: "creator_id"
 
+  has_many :questions_assigned, through: :challenges_assigned, source: :questions
+
   has_many :student_teacher_invitations_sent, class_name: "StudentTeacherInvitation", foreign_key: "creator_id"
   has_many :student_teacher_invitations_received, class_name: "StudentTeacherInvitation",
                                                   foreign_key: "recipient_phone_number",
@@ -25,6 +27,21 @@ class User < ApplicationRecord
 
   has_many :students, through: :student_teachers_where_teacher
   has_many :teachers, through: :student_teachers_where_student
+
+  has_one :user_settings
+
+  TIME_FOR_NEW_QUESTION_PROBABILITY = 0.1
+  SEND_OLD_CHALLENGE_PROBABILITY = 0.1
+
+  def send_question_if_time
+    return unless appropriate_time_for_text?
+
+    if last_question_waiting_on_attempt?
+      last_question.send_reminder if last_question.needs_reminder?
+    elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
+      next_challenge&.new_question
+    end
+  end
 
   def jwt_token
     JWT.encode({user_id: id}, Rails.application.secret_key_base)
@@ -54,17 +71,62 @@ class User < ApplicationRecord
     student_teacher_invitations_sent.where("created_at > ?", 1.week.ago)
   end
 
-  def self.create_and_send_confirmation(attrs)
-    create(attrs).tap do |user|
-      break user unless user.persisted?
+  def appropriate_time_for_text?
+    current_hour = Time.now.in_time_zone(user_settings.timezone).strftime("%H").to_i
 
-      front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+    current_hour >= 8 && current_hour < 23
+  end
 
-      url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+  def last_question
+    questions_assigned.order(created_at: :desc).first
+  end
 
-      message = "Please click this link to confirm your account. #{url}"
+  def last_question_waiting_on_attempt?
+    return false unless last_question
 
-      user.text(message)
+    !last_question.attempted?
+  end
+
+  def next_challenge
+    active_count = challenges_assigned.active.count
+    complete_count = challenges_assigned.complete.count
+
+    return nil if active_count.zero? && complete_count.zero?
+
+    if (rand < SEND_OLD_CHALLENGE_PROBABILITY && complete_count.positive?) || active_count.zero?
+      challenges_assigned.complete.sample
+    elsif last_question.present? && active_count > 1
+      last_challenge = last_question.challenge
+
+      challenges_assigned.active.where.not(id: last_challenge.id).sample
+    else
+      challenges_assigned.active.sample
     end
+  end
+
+  def self.create_and_send_confirmation(attrs)
+    user = new(attrs.except(:timezone))
+
+    return user unless attrs[:timezone].present?
+
+    user.save
+
+    return user unless user.persisted?
+
+    UserSettings.create(user: user, timezone: attrs[:timezone])
+
+    front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+
+    url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
+
+    message = "Please click this link to confirm your account. #{url}"
+
+    user.text(message)
+
+    user
+  end
+
+  def self.send_questions_if_time
+    find_each(&:send_question_if_time)
   end
 end

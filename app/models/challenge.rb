@@ -44,7 +44,7 @@ class Challenge < ApplicationRecord
     end
   end
 
-  def create_and_send_question
+  def new_question
     question = Question.create(challenge: self, language: random_language)
     question.send_message
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_16_013212) do
+ActiveRecord::Schema.define(version: 2021_10_28_075740) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -63,6 +63,14 @@ ActiveRecord::Schema.define(version: 2021_10_16_013212) do
     t.integer "teacher_id", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["student_id", "teacher_id"], name: "index_student_teachers_on_student_id_and_teacher_id", unique: true
+  end
+
+  create_table "user_settings", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.string "timezone", null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|

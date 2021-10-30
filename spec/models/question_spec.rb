@@ -62,4 +62,48 @@ RSpec.describe Question, type: :model do
       expect(reminder_message).to eql("Reminder: #{question.message}")
     end
   end
+
+  describe "#needs_reminder?" do
+    subject(:needs_reminder?) { question.needs_reminder? }
+
+    include_context "with twilio_client stub"
+
+    context "when it's a newly-sent question" do
+      let(:question) { create(:question) }
+
+      before { question.send_message }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it was sent a while ago" do
+      let(:question) do
+        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
+                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context "when it was sent a while ago but it's been attempted'" do
+      let(:question) do
+        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
+                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+      end
+
+      before do
+        create(:attempt, question: question)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it was sent a while ago but a reminder was sent recently" do
+      let(:question) do
+        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute, last_sent_at: Time.now)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
 end

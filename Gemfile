@@ -53,6 +53,10 @@ group :development do
   gem "rubocop-rspec", require: false
 end
 
+group :test do
+  gem "faker"
+end
+
 gem "bcrypt"
 
 gem "jwt"

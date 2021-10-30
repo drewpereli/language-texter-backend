@@ -272,4 +272,365 @@ RSpec.describe User, type: :model do
       ])
     end
   end
+
+  describe ".create_and_send_confirmation" do
+    subject(:create_and_send_confirmation) { described_class.create_and_send_confirmation(attrs) }
+
+    include_context "with twilio_client stub"
+
+    let(:attrs) do
+      password = "#{Faker::Internet.password(min_length: 12, mix_case: true)}1"
+
+      {
+        username: Faker::Internet.username,
+        phone_number: "222-333-4444",
+        password: password,
+        password_confirmation: password,
+        timezone: Faker::Address.time_zone
+      }
+    end
+
+    it "creates a user" do
+      expect { create_and_send_confirmation }.to change(described_class, :count).by(1)
+    end
+
+    it "creates a user settings model" do
+      expect { create_and_send_confirmation }.to change(UserSettings, :count).by(1)
+    end
+
+    it "assigns the settings model to the user" do
+      user = create_and_send_confirmation
+
+      expect(user.user_settings).not_to be_nil
+    end
+
+    it "sends a confirmation link to the user" do
+      create_and_send_confirmation
+      expect(twilio_client).to have_received(:text_number).with("+12223334444",
+                                                                /^Please click this link to confirm your account/)
+    end
+  end
+
+  describe "#appropriate_time_for_text?" do
+    subject(:appropriate_time_for_text?) { user.appropriate_time_for_text? }
+
+    let(:user) { create(:user) }
+
+    let(:timezone) { Faker::Address.time_zone }
+
+    let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
+    let(:hour_now) { 12 }
+    let(:minute_now) { 0 }
+
+    before do
+      allow(Time).to receive(:now).and_return(time_now)
+
+      user.user_settings.timezone = timezone
+    end
+
+    context "when it is after 11 pm" do
+      let(:hour_now) { 23 }
+      let(:minute_now) { 30 }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it is before 8 am" do
+      let(:hour_now) { 7 }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it is between 8 and 11" do
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe "#questions_assigned" do
+    subject(:questions_assigned) { user.questions_assigned }
+
+    let(:user) { create(:user) }
+
+    let!(:c1) { create(:challenge, student: user) }
+    let!(:c2) { create(:challenge, student: user) }
+    let!(:c3) { create(:challenge, student: user) }
+
+    let!(:c4) { create(:challenge, creator: user) }
+
+    let!(:c1_q1) { create(:question, challenge: c1, id: 1) }
+    let!(:c2_q1) { create(:question, challenge: c2, id: 2) }
+    let!(:c2_q2) { create(:question, challenge: c2, id: 3) }
+    let!(:c3_q1) { create(:question, challenge: c3, id: 4) }
+
+    let(:c4_q1) { create(:question, challenge: c4) }
+
+    before do
+      create_list(:question, 10)
+    end
+
+    it "returns the user's assigned questions" do
+      expect(questions_assigned.ids).to match_array([1, 2, 3, 4])
+    end
+  end
+
+  describe "#last_question" do
+    subject(:last_question) { user.last_question }
+
+    let(:user) { create(:user) }
+
+    let!(:c1) { create(:challenge, student: user) }
+    let!(:c2) { create(:challenge, student: user) }
+    let!(:c3) { create(:challenge, student: user) }
+
+    let!(:c4) { create(:challenge, creator: user) }
+
+    let!(:c1_q1) { create(:question, challenge: c1, id: 1) }
+    let!(:c2_q1) { create(:question, challenge: c2, id: 2) }
+    let!(:c2_q2) { create(:question, challenge: c2, id: 3) }
+    let!(:c3_q1) { create(:question, challenge: c3, id: 4) }
+
+    let(:c4_q1) { create(:question, challenge: c4) }
+
+    before do
+      create_list(:question, 10)
+    end
+
+    it "returns the last question sent" do
+      expect(last_question.id).to be(4)
+    end
+  end
+
+  describe "#last_question_waiting_on_attempt?" do
+    subject(:last_question_waiting_on_attempt?) { user.last_question_waiting_on_attempt? }
+
+    let(:user) { create(:user) }
+
+    context "when there are no challenges" do
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges but no questions" do
+      before { create(:challenge, student: user) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges and questions, but all the questions have responses" do
+      before do
+        challenge = create(:challenge, student: user)
+
+        question = create(:question, challenge: challenge)
+
+        create(:attempt, :correct, question: question)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when there are challenges and questions, but the last questions does not have a response" do
+      before do
+        challenge = create(:challenge, student: user)
+
+        question = create(:question, challenge: challenge)
+
+        create(:attempt, :correct, question: question)
+
+        create(:question, challenge: challenge)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe "#next_challenge" do
+    subject(:next_challenge) { user.next_challenge }
+
+    let(:user) { create(:user) }
+
+    before do
+      create_list(:challenge, 10)
+      create_list(:challenge, 10, student: user, status: "queued")
+    end
+
+    context "when there are no active or complete challenges assigned to the user" do
+      it { is_expected.to be_nil }
+    end
+
+    context "when rand is greater than SEND_OLD_CHALLENGE_PROBABILITY" do
+      before do
+        allow(user).to receive(:rand).and_return(1)
+      end
+
+      context "when there are challenges and none have been attempted" do
+        before do
+          create_list(:challenge, 5, student: user, status: "active")
+        end
+
+        it "returns a random user challenge" do
+          expect(next_challenge.student.id).to be(user.id)
+        end
+      end
+
+      context "when there are challenges and at least one has been attempted" do
+        let!(:last_challenge_answered) { create(:challenge, student: user) }
+
+        before do
+          question = create(:question, challenge: last_challenge_answered)
+          create(:attempt, question: question)
+
+          create_list(:challenge, 5, student: user, status: "active")
+        end
+
+        it "returns a random user challenge that's not the last one sent" do
+          challenge = next_challenge
+          expect(challenge.student.id).to be(user.id)
+          expect(challenge.id).not_to be(last_challenge_answered.id)
+        end
+      end
+
+      context "when there is only one challenge and it has been attempted" do
+        let!(:last_challenge_answered) { create(:challenge, student: user, status: "active") }
+
+        before do
+          question = create(:question, challenge: last_challenge_answered)
+          create(:attempt, question: question)
+        end
+
+        it "returns a the challenge" do
+          expect(next_challenge.id).to be(last_challenge_answered.id)
+        end
+      end
+
+      context "when there is only one challenge and it's complete'" do
+        let!(:last_challenge_answered) { create(:challenge, student: user, status: "complete") }
+
+        it "returns a the challenge" do
+          expect(next_challenge.id).to be(last_challenge_answered.id)
+        end
+      end
+    end
+
+    context "when rand is less than SEND_OLD_CHALLENGE_PROBABILITY" do
+      before do
+        allow(user).to receive(:rand).and_return(0)
+      end
+
+      context "when there are complete challenges" do
+        before { create_list(:challenge, 10, student: user, status: "complete") }
+
+        it "returns a random complete challenge" do
+          expect(next_challenge).to be_complete
+        end
+      end
+
+      context "when there is only one challenge and it's active'" do
+        let!(:challenge) { create(:challenge, student: user, status: "active") }
+
+        it "returns a the challenge" do
+          expect(next_challenge.id).to be(challenge.id)
+        end
+      end
+    end
+  end
+
+  describe "#send_question_if_time" do
+    subject(:send_question_if_time) { user.send_question_if_time }
+
+    include_context "with twilio_client stub"
+
+    let(:user) { create(:user) }
+
+    before { allow(user).to receive(:appropriate_time_for_text?).and_return(true) }
+
+    context "when the user has no assigned challenges" do
+      it "does not text the user" do
+        send_question_if_time
+        expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+
+    context "when the last question has been answered and rand is less than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+      before do
+        allow(user).to receive(:rand).and_return(0)
+
+        create_list(:challenge, 10, student: user, status: "active")
+
+        question = create(:question, challenge: user.challenges_assigned.active.sample)
+        create(:attempt, question: question)
+      end
+
+      it "creates a new question" do
+        expect { send_question_if_time }.to change(Question, :count).by(1)
+      end
+
+      it "texts the user the new question" do
+        send_question_if_time
+        expect(twilio_client).to have_received(:text_number).with(user.phone_number, Question.last.message)
+      end
+    end
+
+    context "when the last question has been answered and rand is greater than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+      before do
+        allow(user).to receive(:rand).and_return(1)
+      end
+
+      it "does not create a new question" do
+        expect { send_question_if_time }.to change(Question, :count).by(0)
+      end
+
+      it "does not text the user" do
+        send_question_if_time
+        expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+
+    context "when the last question hasn't been answered and a reminder hasn't been sent in a while" do
+      let!(:challenge) { create(:challenge, student: user) }
+      let!(:question) { create(:question, challenge: challenge, created_at: 1.year.ago, last_sent_at: 1.year.ago) }
+
+      before do
+        allow(user).to receive(:rand).and_return(0)
+      end
+
+      it "does not create a new question" do
+        expect { send_question_if_time }.to change(Question, :count).by(0)
+      end
+
+      it "texts the user a reminder" do
+        send_question_if_time
+        expect(twilio_client).to have_received(:text_number).with(user.phone_number, question.reminder_message)
+      end
+    end
+
+    context "when the last question hasn't been answered and but it was sent recently" do
+      let!(:challenge) { create(:challenge, student: user) }
+      let!(:question) { create(:question, challenge: challenge, created_at: 1.year.ago, last_sent_at: Time.now) }
+
+      before do
+        allow(user).to receive(:rand).and_return(0)
+      end
+
+      it "does not create a new question" do
+        expect { send_question_if_time }.to change(Question, :count).by(0)
+      end
+
+      it "does not text the user" do
+        send_question_if_time
+        expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+
+    context "when appropriate_time_for_text? is false" do
+      before { allow(user).to receive(:appropriate_time_for_text?).and_return(false) }
+
+      it "does not create a new question" do
+        expect { send_question_if_time }.to change(Question, :count).by(0)
+      end
+
+      it "does not text the user" do
+        send_question_if_time
+        expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+  end
 end
