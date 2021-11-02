@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_28_075740) do
+ActiveRecord::Schema.define(version: 2021_11_02_022534) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -24,10 +24,10 @@ ActiveRecord::Schema.define(version: 2021_10_28_075740) do
   create_table "challenges", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
     t.integer "creator_id", null: false
-    t.integer "current_streak", default: 0, null: false
+    t.integer "current_score", default: 0, null: false
     t.string "english_text", null: false
     t.string "english_text_note"
-    t.integer "required_streak_for_completion", default: 20, null: false
+    t.integer "required_score", null: false
     t.string "spanish_text", null: false
     t.string "spanish_text_note"
     t.integer "status", default: 0, null: false
