@@ -6,20 +6,20 @@ class ChallengeSerializer < ActiveModel::Serializer
              :english_text,
              :spanish_text_note,
              :english_text_note,
-             :required_streak_for_completion,
+             :required_score,
              :status,
              :created_at,
              :student_id,
              :creator_id,
-             :current_streak
+             :current_score
 
-  def current_streak
+  def current_score
     if object.active?
-      object.current_streak
+      object.current_score
     elsif object.queued?
       0
     else # if object.complete?
-      object.required_streak_for_completion
+      object.required_score
     end
   end
 end

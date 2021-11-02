@@ -180,10 +180,10 @@ RSpec.describe Challenge, type: :model do
       let(:attempt) { create(:attempt, result_status: "incorrect_active", challenge: challenge) }
 
       it "resets the current streak to 0" do
-        challenge.update(current_streak: 10)
+        challenge.update(current_score: 10)
         process_attempt
         challenge.reload
-        expect(challenge.current_streak).to be 0
+        expect(challenge.current_score).to be 0
       end
     end
 
@@ -191,10 +191,10 @@ RSpec.describe Challenge, type: :model do
       let(:attempt) { create(:attempt, result_status: "correct_active_insufficient", challenge: challenge) }
 
       it "increments the current streak" do
-        challenge.update(current_streak: 5)
+        challenge.update(current_score: 5)
         process_attempt
         challenge.reload
-        expect(challenge.current_streak).to be 6
+        expect(challenge.current_score).to be 6
       end
     end
 
@@ -202,10 +202,10 @@ RSpec.describe Challenge, type: :model do
       let(:attempt) { create(:attempt, result_status: "correct_active_sufficient", challenge: challenge) }
 
       it "increments the current streak" do
-        challenge.update(current_streak: 5)
+        challenge.update(current_score: 5)
         process_attempt
         challenge.reload
-        expect(challenge.current_streak).to be 6
+        expect(challenge.current_score).to be 6
       end
 
       it "calls #mark_as_complete on the challenge" do
@@ -218,10 +218,10 @@ RSpec.describe Challenge, type: :model do
       let(:attempt) { create(:attempt, result_status: "incorrect_complete", challenge: challenge) }
 
       it "resets the current streak to 0" do
-        challenge.update(current_streak: 10)
+        challenge.update(current_score: 10)
         process_attempt
         challenge.reload
-        expect(challenge.current_streak).to be 0
+        expect(challenge.current_score).to be 0
       end
 
       it "reactivates the challenge" do
@@ -236,10 +236,10 @@ RSpec.describe Challenge, type: :model do
       let(:attempt) { create(:attempt, result_status: "correct_complete", challenge: challenge) }
 
       it "increments the current streak" do
-        challenge.update(current_streak: 5)
+        challenge.update(current_score: 5)
         process_attempt
         challenge.reload
-        expect(challenge.current_streak).to be 6
+        expect(challenge.current_score).to be 6
       end
     end
   end

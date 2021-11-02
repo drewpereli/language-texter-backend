@@ -70,7 +70,7 @@ class ChallengesController < ApplicationController
       :english_text,
       :spanish_text_note,
       :english_text_note,
-      :required_streak_for_completion,
+      :required_score,
       :student_id
     )
   end

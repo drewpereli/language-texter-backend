@@ -14,11 +14,11 @@ class Challenge < ApplicationRecord
   MAX_ACTIVE = 10
 
   def streak_enough_for_completion?
-    current_streak >= required_streak_for_completion
+    current_score >= required_score
   end
 
   def correct_attempts_still_required
-    [0, required_streak_for_completion - current_streak].max
+    [0, required_score - current_score].max
   end
 
   def mark_as_complete
@@ -32,14 +32,14 @@ class Challenge < ApplicationRecord
   def process_attempt(attempt)
     case attempt.result_status
     when "incorrect_active"
-      update(current_streak: 0)
+      update(current_score: 0)
     when "correct_active_insufficient", "correct_complete"
-      increment!(:current_streak)
+      increment!(:current_score)
     when "correct_active_sufficient"
-      increment!(:current_streak)
+      increment!(:current_score)
       mark_as_complete
     when "incorrect_complete"
-      update(current_streak: 0)
+      update(current_score: 0)
       active!
     end
   end

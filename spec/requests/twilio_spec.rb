@@ -85,7 +85,7 @@ RSpec.describe "Twilio", type: :request do
           let(:request_message) { "foo" }
 
           before do
-            challenge.update(current_streak: challenge.required_streak_for_completion - 1)
+            challenge.update(current_score: challenge.required_score - 1)
           end
 
           include_examples "it creates an attempt with the correct result status and texts a response",

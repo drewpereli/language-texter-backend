@@ -122,7 +122,7 @@ RSpec.describe Attempt, type: :model do
       context "when it is the last attempt needed for an active challenge" do
         before do
           attempt.challenge.active!
-          attempt.challenge.update(current_streak: attempt.challenge.required_streak_for_completion - 1)
+          attempt.challenge.update(current_score: attempt.challenge.required_score - 1)
         end
 
         it { is_expected.to be(:correct_active_sufficient) }
