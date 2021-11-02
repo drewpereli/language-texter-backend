@@ -106,7 +106,7 @@ RSpec.describe Challenge, type: :model do
     let(:creator) { create(:user) }
 
     let(:attrs) do
-      {spanish_text: "foo", english_text: "bar", student: student, creator: creator}
+      {spanish_text: "foo", english_text: "bar", student: student, creator: creator, required_score: 20}
     end
 
     context "when attrs are all valid" do
@@ -122,7 +122,7 @@ RSpec.describe Challenge, type: :model do
 
     context "when english text and spanish text has extra spaces" do
       let(:attrs) do
-        {spanish_text: "  foo    ", english_text: "  bar    ", student: student, creator: creator}
+        {spanish_text: "  foo    ", english_text: "  bar    ", student: student, creator: creator, required_score: 20}
       end
 
       it "strips them" do
@@ -135,7 +135,7 @@ RSpec.describe Challenge, type: :model do
 
     context "when attrs are invalid" do
       let(:attrs) do
-        {spanish_text: nil, english_text: "bar", student: student, creator: creator}
+        {spanish_text: nil, english_text: "bar", student: student, creator: creator, required_score: 20}
       end
 
       it "doesn't create a challenge" do

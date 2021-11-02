@@ -12,5 +12,7 @@ FactoryBot.define do
     sequence :english_text do |n|
       "my-english-text=#{n}"
     end
+
+    required_score { 20 }
   end
 end

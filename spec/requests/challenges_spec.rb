@@ -49,7 +49,8 @@ RSpec.describe "Challenges", type: :request do
       {
         spanish_text: "amigo",
         english_text: "friend",
-        student_id: student.id
+        student_id: student.id,
+        required_score: 20
       }
     end
 
