@@ -57,6 +57,21 @@ RSpec.describe "Challenges", type: :request do
     it "creates a new Challenge" do
       expect { post_create }.to change(Challenge, :count).by(1)
     end
+
+    context "when student is not included" do
+      let(:create_params) do
+        {
+          spanish_text: "amigo",
+          english_text: "friend",
+          student_id: nil,
+          required_score: 20
+        }
+      end
+
+      it "creates a new Challenge" do
+        expect { post_create }.to change(Challenge, :count).by(1)
+      end
+    end
   end
 
   describe "PUT update" do
