@@ -116,7 +116,22 @@ RSpec.describe Challenge, type: :model do
 
       it "texts the student" do
         create_and_process
-        expect(twilio_client).to have_received(:text_number).with(student.phone_number, String)
+        expect(twilio_client).to have_received(:text_number).with(student.phone_number, /challenged added/)
+      end
+    end
+
+    context "when all attrs are valid but student and creator are same" do
+      let(:attrs) do
+        {spanish_text: "foo", english_text: "bar", student: student, creator: student, required_score: 20}
+      end
+
+      it "creates a challenge" do
+        expect { create_and_process }.to change(described_class, :count).by(1)
+      end
+
+      it "does not send a text" do
+        create_and_process
+        expect(twilio_client).not_to have_received(:text_number)
       end
     end
 

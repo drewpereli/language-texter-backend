@@ -50,7 +50,7 @@ class Challenge < ApplicationRecord
   end
 
   def send_creation_message
-    student.text(event_messages[:completed])
+    student.text(event_messages[:created])
   end
 
   class << self
@@ -61,7 +61,7 @@ class Challenge < ApplicationRecord
       create(attrs).tap do |challenge|
         challenge.update(status: "active") if need_more_active?
 
-        challenge.send_creation_message if challenge.valid?
+        challenge.send_creation_message if challenge.valid? && challenge.creator.id != challenge.student.id
       end
     end
 
