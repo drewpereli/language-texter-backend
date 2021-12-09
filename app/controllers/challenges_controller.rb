@@ -27,7 +27,12 @@ class ChallengesController < ApplicationController
   def create
     authorize(Challenge)
 
-    @challenge = Challenge.create_and_process(challenge_params.merge(creator: current_user))
+    student_id = challenge_params[:student_id].present? ? challenge_params[:student_id] : current_user.id
+
+    params_with_defaults = challenge_params.merge(creator: current_user,
+                                                  student_id: student_id)
+
+    @challenge = Challenge.create_and_process(params_with_defaults)
 
     if @challenge.valid?
       render json: @challenge
