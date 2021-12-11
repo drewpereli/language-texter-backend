@@ -13,4 +13,6 @@ Rails.application.routes.draw do
 
   resources :student_teachers, only: %i[index destroy]
   resources :student_teacher_invitations, only: %i[index create update destroy]
+
+  resources :languages, only: %i[index]
 end

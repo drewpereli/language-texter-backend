@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_022534) do
+ActiveRecord::Schema.define(version: 2021_12_11_023208) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -35,6 +35,14 @@ ActiveRecord::Schema.define(version: 2021_11_02_022534) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["creator_id"], name: "index_challenges_on_creator_id"
     t.index ["student_id"], name: "index_challenges_on_student_id"
+  end
+
+  create_table "languages", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.string "name", null: false
+    t.string "native_name", null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "questions", force: :cascade do |t|
@@ -77,6 +85,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_022534) do
     t.string "confirmation_token"
     t.boolean "confirmed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
+    t.string "language_learning", default: "es", null: false
     t.string "password_digest", null: false
     t.string "phone_number", null: false
     t.datetime "updated_at", precision: 6, null: false
