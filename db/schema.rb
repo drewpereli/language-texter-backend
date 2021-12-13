@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_11_023208) do
+ActiveRecord::Schema.define(version: 2021_12_11_234623) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(version: 2021_12_11_023208) do
 
   create_table "user_settings", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
+    t.integer "default_challenge_language_id"
     t.string "timezone", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "user_id", null: false
