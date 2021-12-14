@@ -115,7 +115,7 @@ class User < ApplicationRecord
 
     UserSettings.create(user: user, timezone: attrs[:timezone])
 
-    front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+    front_end_url = Rails.env.production? ? "www.learning_languagetexter.com" : "localhost:4200"
 
     url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
 

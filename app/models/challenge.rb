@@ -9,7 +9,7 @@ class Challenge < ApplicationRecord
   has_many :questions, dependent: :destroy
   has_many :attempts, through: :questions
 
-  validates :spanish_text, :english_text, :student, :creator, presence: true
+  validates :learning_language_text, :native_language_text, :student, :creator, presence: true
 
   MAX_ACTIVE = 10
 
@@ -55,8 +55,8 @@ class Challenge < ApplicationRecord
 
   class << self
     def create_and_process(attrs)
-      attrs[:spanish_text] = attrs[:spanish_text]&.strip
-      attrs[:english_text] = attrs[:english_text]&.strip
+      attrs[:learning_language_text] = attrs[:learning_language_text]&.strip
+      attrs[:native_language_text] = attrs[:native_language_text]&.strip
 
       create(attrs).tap do |challenge|
         challenge.update(status: "active") if need_more_active?
@@ -86,16 +86,16 @@ class Challenge < ApplicationRecord
 
   def random_language
     if rand < 0.66
-      "english"
+      "native_language"
     else
-      "spanish"
+      "learning_language"
     end
   end
 
   def event_message_variables
     {
-      spanish_text: spanish_text.strip,
-      english_text: english_text.strip,
+      learning_language_text: learning_language_text.strip,
+      native_language_text: native_language_text.strip,
       student_username: student.username
     }
   end

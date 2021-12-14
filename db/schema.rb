@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_11_234623) do
+ActiveRecord::Schema.define(version: 2021_12_13_063406) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -25,11 +25,11 @@ ActiveRecord::Schema.define(version: 2021_12_11_234623) do
     t.datetime "created_at", precision: 6, null: false
     t.integer "creator_id", null: false
     t.integer "current_score", default: 0, null: false
-    t.string "english_text", null: false
-    t.string "english_text_note"
+    t.string "learning_language_text", null: false
+    t.string "learning_language_text_note"
+    t.string "native_language_text", null: false
+    t.string "native_language_text_note"
     t.integer "required_score", null: false
-    t.string "spanish_text", null: false
-    t.string "spanish_text_note"
     t.integer "status", default: 0, null: false
     t.integer "student_id", null: false
     t.datetime "updated_at", precision: 6, null: false

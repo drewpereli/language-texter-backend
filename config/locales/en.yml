@@ -1,13 +1,13 @@
 en:
   event_messages:
     challenges:
-      created: New challenged added! "#{spanish_text}" / "#{english_text}"".
-      completed: '%{student_username} has completed the challenge "%{spanish_text}"!'
+      created: New challenged added! "#{learning_language_text}" / "#{native_language_text}"".
+      completed: '%{student_username} has completed the challenge "%{learning_language_text}"!'
     questions:
-      spanish_challenge: What does "%{spanish_text}" mean?
-      english_challenge: How do you say "%{english_text}" in spanish?
-      spanish_note: '(Note: %{spanish_note})'
-      english_note: '(Note: %{english_note})'
+      learning_language_challenge: What does "%{learning_language_text}" mean?
+      native_language_challenge: How do you say "%{native_language_text}" in learning_language?
+      learning_language_note: '(Note: %{learning_language_note})'
+      native_language_note: '(Note: %{native_language_note})'
       reminder_base: 'Reminder:'
     attempts:
       incorrect_active: That's incorrect. The correct answer is %{correct_text}.

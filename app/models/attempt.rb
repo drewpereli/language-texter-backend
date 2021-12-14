@@ -65,7 +65,7 @@ class Attempt < ApplicationRecord
   end
 
   def response_language_abbreviation
-    if question.response_language == "spanish"
+    if question.response_language == "learning_language"
       :es
     else
       :en

@@ -5,11 +5,11 @@ FactoryBot.define do
     challenge
 
     sequence :language do |n|
-      n.even? ? "english" : "spanish"
+      n.even? ? "native_language" : "learning_language"
     end
 
-    trait :expecting_english_response do
-      language { "spanish" }
+    trait :expecting_native_language_response do
+      language { "learning_language" }
     end
   end
 end

@@ -16,11 +16,12 @@ RSpec.describe "Twilio", type: :request do
 
     context "when there is an active question" do
       let!(:challenge) do
-        create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "complete", student: student,
+        create(:challenge, id: 1, native_language_text: "foo",
+                           learning_language_text: "bar", status: "complete", student: student,
                            creator: creator)
       end
 
-      let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
+      let!(:question) { create(:question, :expecting_native_language_response, challenge: challenge) }
       let!(:creator) { create(:user) }
 
       before do
@@ -53,11 +54,12 @@ RSpec.describe "Twilio", type: :request do
 
       context "when it's not an already-completed challenge" do
         let!(:challenge) do
-          create(:challenge, id: 1, english_text: "foo", spanish_text: "bar", status: "active", student: student,
+          create(:challenge, id: 1, native_language_text: "foo",
+                             learning_language_text: "bar", status: "active", student: student,
                              creator: creator)
         end
 
-        let!(:question) { create(:question, :expecting_english_response, challenge: challenge) }
+        let!(:question) { create(:question, :expecting_native_language_response, challenge: challenge) }
 
         before do
           create(:challenge, id: 2, status: "queued")

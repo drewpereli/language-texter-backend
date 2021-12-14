@@ -52,7 +52,8 @@ RSpec.describe Challenge, type: :model do
     it "updates the challenge status and texts christina" do
       expect_any_instance_of(User)
         .to receive(:text)
-              .with("#{challenge.student.username} has completed the challenge \"#{challenge.spanish_text}\"!")
+              .with("#{challenge.student.username}"\
+                    " has completed the challenge \"#{challenge.learning_language_text}\"!")
               .and_return(nil)
 
       mark_as_complete
@@ -106,7 +107,8 @@ RSpec.describe Challenge, type: :model do
     let(:creator) { create(:user) }
 
     let(:attrs) do
-      {spanish_text: "foo", english_text: "bar", student: student, creator: creator, required_score: 20}
+      {learning_language_text: "foo", native_language_text: "bar", student: student, creator: creator,
+       required_score: 20}
     end
 
     context "when attrs are all valid" do
@@ -122,7 +124,8 @@ RSpec.describe Challenge, type: :model do
 
     context "when all attrs are valid but student and creator are same" do
       let(:attrs) do
-        {spanish_text: "foo", english_text: "bar", student: student, creator: student, required_score: 20}
+        {learning_language_text: "foo", native_language_text: "bar", student: student, creator: student,
+         required_score: 20}
       end
 
       it "creates a challenge" do
@@ -135,22 +138,24 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when english text and spanish text has extra spaces" do
+    context "when native_language text and learning_language text has extra spaces" do
       let(:attrs) do
-        {spanish_text: "  foo    ", english_text: "  bar    ", student: student, creator: creator, required_score: 20}
+        {learning_language_text: "  foo    ", native_language_text: "  bar    ", student: student, creator: creator,
+         required_score: 20}
       end
 
       it "strips them" do
         challenge = create_and_process
 
-        expect(challenge.spanish_text).to eql("foo")
-        expect(challenge.english_text).to eql("bar")
+        expect(challenge.learning_language_text).to eql("foo")
+        expect(challenge.native_language_text).to eql("bar")
       end
     end
 
     context "when attrs are invalid" do
       let(:attrs) do
-        {spanish_text: nil, english_text: "bar", student: student, creator: creator, required_score: 20}
+        {learning_language_text: nil, native_language_text: "bar", student: student, creator: creator,
+         required_score: 20}
       end
 
       it "doesn't create a challenge" do

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class ChallengeBlueprint < ApplicationBlueprint
-  fields :spanish_text,
-         :english_text,
-         :spanish_text_note,
-         :english_text_note,
+  fields :learning_language_text,
+         :native_language_text,
+         :learning_language_text_note,
+         :native_language_text_note,
          :required_score,
          :status,
          :created_at,
