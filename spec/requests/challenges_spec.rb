@@ -44,13 +44,15 @@ RSpec.describe "Challenges", type: :request do
     include_context "with twilio_client stub"
 
     let(:student) { create(:user) }
+    let(:language) { create(:language) }
 
     let(:create_params) do
       {
         learning_language_text: "amigo",
         native_language_text: "friend",
         student_id: student.id,
-        required_score: 20
+        required_score: 20,
+        language_id: language.id
       }
     end
 
@@ -64,7 +66,8 @@ RSpec.describe "Challenges", type: :request do
           learning_language_text: "amigo",
           native_language_text: "friend",
           student_id: nil,
-          required_score: 20
+          required_score: 20,
+          language_id: language.id
         }
       end
 

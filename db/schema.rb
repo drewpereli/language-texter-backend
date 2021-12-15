@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_13_063406) do
+ActiveRecord::Schema.define(version: 2021_12_15_034345) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 2021_12_13_063406) do
     t.datetime "created_at", precision: 6, null: false
     t.integer "creator_id", null: false
     t.integer "current_score", default: 0, null: false
+    t.integer "language_id"
     t.string "learning_language_text", null: false
     t.string "learning_language_text_note"
     t.string "native_language_text", null: false
@@ -34,6 +35,7 @@ ActiveRecord::Schema.define(version: 2021_12_13_063406) do
     t.integer "student_id", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["creator_id"], name: "index_challenges_on_creator_id"
+    t.index ["language_id"], name: "index_challenges_on_language_id"
     t.index ["student_id"], name: "index_challenges_on_student_id"
   end
 

@@ -9,7 +9,8 @@ class ChallengeBlueprint < ApplicationBlueprint
          :status,
          :created_at,
          :student_id,
-         :creator_id
+         :creator_id,
+         :language_id
 
   field :current_score do |challenge|
     if challenge.active?

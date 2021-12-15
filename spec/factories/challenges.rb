@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :challenge do
     student factory: :user
     creator factory: :user
+    language
 
     sequence :learning_language_text do |n|
       "my-learning_language-text=#{n}"

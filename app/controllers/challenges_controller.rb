@@ -76,7 +76,8 @@ class ChallengesController < ApplicationController
       :learning_language_text_note,
       :native_language_text_note,
       :required_score,
-      :student_id
+      :student_id,
+      :language_id
     )
   end
 end
