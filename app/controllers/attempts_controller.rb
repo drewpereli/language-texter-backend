@@ -10,6 +10,6 @@ class AttemptsController < ApplicationController
 
     @attempts = Attempt.for_challenge(challenge)
 
-    render json: @attempts
+    render json: AttemptBlueprint.render(@attempts, root: :attempts)
   end
 end

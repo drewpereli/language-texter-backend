@@ -7,7 +7,7 @@ class ChallengesController < ApplicationController
   def show
     authorize(@challenge)
 
-    render json: @challenge
+    render json: ChallengeBlueprint.render(@challenge, root: :challenge)
   end
 
   # GET /challenges
@@ -20,7 +20,7 @@ class ChallengesController < ApplicationController
                     .page(params[:page])
                     .per(params[:per_page])
 
-    render json: @challenges, meta: {total_pages: @challenges.total_pages}
+    render json: ChallengeBlueprint.render(@challenges, root: :challenges, meta: {total_pages: @challenges.total_pages})
   end
 
   # POST /challenges
@@ -35,7 +35,7 @@ class ChallengesController < ApplicationController
     @challenge = Challenge.create_and_process(params_with_defaults)
 
     if @challenge.valid?
-      render json: @challenge
+      render json: ChallengeBlueprint.render(@challenge, root: :challenge)
     else
       render_model_errors(@challenge)
     end
@@ -46,7 +46,7 @@ class ChallengesController < ApplicationController
     authorize(@challenge)
 
     if @challenge.update(challenge_params)
-      render json: @challenge
+      render json: ChallengeBlueprint.render(@challenge, root: :challenge)
     else
       render_model_errors(@challenge)
     end

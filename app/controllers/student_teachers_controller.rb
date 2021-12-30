@@ -4,7 +4,7 @@ class StudentTeachersController < ApplicationController
   def index
     @student_teachers = policy_scope(StudentTeacher)
 
-    render json: @student_teachers
+    render json: StudentTeacherBlueprint.render(@student_teachers, root: :student_teachers)
   end
 
   def destroy
