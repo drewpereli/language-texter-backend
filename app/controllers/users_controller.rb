@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   def index
     @users = policy_scope(User)
 
-    render json: @users
+    render json: UserBlueprint.render(@users, root: :users)
   end
 
   def create
@@ -16,14 +16,14 @@ class UsersController < ApplicationController
     @user = User.create_and_send_confirmation(create_params)
 
     if @user.valid?
-      render json: @user
+      render json: UserBlueprint.render(@user, root: :user)
     else
       render json: {errors: @user.errors}, status: :unauthorized
     end
   end
 
   def me
-    render json: current_user
+    render json: UserBlueprint.render(current_user, root: :user, view: :for_current_user)
   end
 
   def change_password
@@ -75,7 +75,7 @@ class UsersController < ApplicationController
 
     @user.confirm!
 
-    render json: @user
+    render json: UserBlueprint.render(@user, root: :user)
   end
 
   private

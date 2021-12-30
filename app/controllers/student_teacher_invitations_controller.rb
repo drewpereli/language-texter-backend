@@ -6,7 +6,8 @@ class StudentTeacherInvitationsController < ApplicationController
   def index
     @invitations = policy_scope(StudentTeacherInvitation)
 
-    render json: @invitations
+    render json: StudentTeacherInvitationBlueprint.render(@invitations, root: :student_teacher_invitations,
+                                                                        current_user_id: current_user.id)
   end
 
   def create
@@ -16,7 +17,14 @@ class StudentTeacherInvitationsController < ApplicationController
 
     if @invitation.save
       @invitation.send_invitation_message
-      render json: @invitation, status: :created, location: @invitation
+
+      response_body = StudentTeacherInvitationBlueprint.render(
+        @invitation,
+        root: :student_teacher_invitation,
+        current_user_id: current_user.id
+      )
+
+      render json: response_body, status: :created, location: @invitation
     else
       render_model_errors(@invitation)
     end
@@ -28,7 +36,8 @@ class StudentTeacherInvitationsController < ApplicationController
     @invitation.respond_and_notify(update_params[:status])
 
     if @invitation.valid?
-      render json: @invitation
+      render json: StudentTeacherInvitationBlueprint.render(@invitation, root: :student_teacher_invitation,
+                                                                         current_user_id: current_user.id)
     else
       render_model_errors(@invitation)
     end

@@ -68,6 +68,24 @@ RSpec.describe "Users", type: :request do
     end
   end
 
+  describe "me" do
+    subject(:get_me) { get "/users/me", headers: authenticated_headers }
+
+    let(:response_ids) do
+      parsed_body["users"].map { |record| record["id"] }
+    end
+
+    it "responds with the current user" do
+      get_me
+      expect(parsed_body["user"]["id"]).to eql(user.id)
+    end
+
+    it "includes the user settings" do
+      get_me
+      expect(parsed_body["user"]["user_settings"]).not_to be_nil
+    end
+  end
+
   describe "login" do
     subject(:post_login) { post "/users/login", params: params }
 
