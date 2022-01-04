@@ -23,7 +23,7 @@ class UsersController < ApplicationController
   end
 
   def me
-    render json: UserBlueprint.render(current_user, root: :user, view: :for_current_user)
+    render json: UserBlueprint.render_as_hash(current_user, root: :user).merge(UserSettingsBlueprint.render_as_hash(current_user.user_settings, root: :user_settings))
   end
 
   def change_password
