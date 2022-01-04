@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_04_070344) do
+ActiveRecord::Schema.define(version: 2022_01_04_071137) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -80,6 +80,7 @@ ActiveRecord::Schema.define(version: 2022_01_04_070344) do
     t.integer "default_challenge_language_id"
     t.time "earliest_text_time", default: "2000-01-01 09:00:00", null: false
     t.time "latest_text_time", default: "2000-01-01 22:00:00", null: false
+    t.integer "reminder_frequency"
     t.string "timezone", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "user_id", null: false
