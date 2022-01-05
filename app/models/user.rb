@@ -113,7 +113,8 @@ class User < ApplicationRecord
 
     return user unless user.persisted?
 
-    UserSettings.create(user: user, timezone: attrs[:timezone], default_challenge_language_id: attrs[:default_challenge_language_id])
+    UserSettings.create(user: user, timezone: attrs[:timezone],
+                        default_challenge_language_id: attrs[:default_challenge_language_id])
 
     front_end_url = Rails.env.production? ? "www.learning_languagetexter.com" : "localhost:4200"
 

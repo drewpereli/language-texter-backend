@@ -26,10 +26,6 @@ RSpec.describe "Users", type: :request do
     subject(:post_create) { post "/users", params: {user: create_params} }
 
     let(:timezone) { Faker::Address.time_zone }
-    let(:language) { create(:language) }
-
-    include_context "with twilio_client stub"
-
     let(:create_params) do
       {
         username: "foobar",
@@ -40,6 +36,9 @@ RSpec.describe "Users", type: :request do
         default_challenge_language_id: language.id
       }
     end
+    let(:language) { create(:language) }
+
+    include_context "with twilio_client stub"
 
     it "creates a new User with confirmed = false and correct attributes" do
       expect { post_create }.to change(User, :count).by(1)

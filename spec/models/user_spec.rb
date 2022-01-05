@@ -277,10 +277,6 @@ RSpec.describe User, type: :model do
     subject(:create_and_process) { described_class.create_and_process(attrs) }
 
     let(:timezone) { Faker::Address.time_zone }
-    let(:language) { create(:language) }
-
-    include_context "with twilio_client stub"
-
     let(:attrs) do
       password = "#{Faker::Internet.password(min_length: 12, mix_case: true)}1"
 
@@ -293,6 +289,9 @@ RSpec.describe User, type: :model do
         default_challenge_language_id: language.id
       }
     end
+    let(:language) { create(:language) }
+
+    include_context "with twilio_client stub"
 
     it "creates a user" do
       expect { create_and_process }.to change(described_class, :count).by(1)
