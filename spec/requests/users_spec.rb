@@ -82,7 +82,7 @@ RSpec.describe "Users", type: :request do
 
     it "includes the user settings" do
       get_me
-      expect(parsed_body["user"]["user_settings"]).not_to be_nil
+      expect(parsed_body["user_settings"]).not_to be_nil
     end
   end
 
