@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
 class UserSettingsBlueprint < ApplicationBlueprint
-  fields :user_id, :timezone, :default_challenge_language_id
+  fields :user_id,
+    :timezone,
+    :default_challenge_language_id,
+    :earliest_text_time,
+    :latest_text_time,
+    :reminder_frequency
 end
