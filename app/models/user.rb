@@ -104,7 +104,7 @@ class User < ApplicationRecord
     end
   end
 
-  def self.create_and_send_confirmation(attrs)
+  def self.create_and_process(attrs)
     user = new(attrs.except(:timezone))
 
     return user unless attrs[:timezone].present?

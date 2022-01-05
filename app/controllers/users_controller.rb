@@ -13,7 +13,7 @@ class UsersController < ApplicationController
   def create
     authorize(User)
 
-    @user = User.create_and_send_confirmation(create_params)
+    @user = User.create_and_process(create_params)
 
     if @user.valid?
       render json: UserBlueprint.render(@user, root: :user)

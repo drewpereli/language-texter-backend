@@ -273,8 +273,8 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe ".create_and_send_confirmation" do
-    subject(:create_and_send_confirmation) { described_class.create_and_send_confirmation(attrs) }
+  describe ".create_and_process" do
+    subject(:create_and_process) { described_class.create_and_process(attrs) }
 
     include_context "with twilio_client stub"
 
@@ -291,21 +291,21 @@ RSpec.describe User, type: :model do
     end
 
     it "creates a user" do
-      expect { create_and_send_confirmation }.to change(described_class, :count).by(1)
+      expect { create_and_process }.to change(described_class, :count).by(1)
     end
 
     it "creates a user settings model" do
-      expect { create_and_send_confirmation }.to change(UserSettings, :count).by(1)
+      expect { create_and_process }.to change(UserSettings, :count).by(1)
     end
 
     it "assigns the settings model to the user" do
-      user = create_and_send_confirmation
+      user = create_and_process
 
       expect(user.user_settings).not_to be_nil
     end
 
     it "sends a confirmation link to the user" do
-      create_and_send_confirmation
+      create_and_process
       expect(twilio_client).to have_received(:text_number).with("+12223334444",
                                                                 /^Please click this link to confirm your account/)
     end
