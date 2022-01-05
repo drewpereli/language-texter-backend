@@ -8,4 +8,6 @@ class UserSettings < ApplicationRecord
 
   validates :timezone, :user, :default_challenge_language, presence: true
   validates_uniqueness_of :user_id
+
+  enum reminder_frequency: %i[no_reminders hourly every_four_hours daily]
 end
