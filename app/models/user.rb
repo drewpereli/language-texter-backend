@@ -28,7 +28,7 @@ class User < ApplicationRecord
   has_many :students, through: :student_teachers_where_teacher
   has_many :teachers, through: :student_teachers_where_student
 
-  has_one :user_settings
+  has_one :user_settings, dependent: :destroy
 
   TIME_FOR_NEW_QUESTION_PROBABILITY = 0.1
   SEND_OLD_CHALLENGE_PROBABILITY = 0.1
