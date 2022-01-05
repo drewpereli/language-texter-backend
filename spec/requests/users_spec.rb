@@ -25,6 +25,9 @@ RSpec.describe "Users", type: :request do
   describe "POST create" do
     subject(:post_create) { post "/users", params: {user: create_params} }
 
+    let(:timezone) { Faker::Address.time_zone }
+    let(:language) { create(:language) }
+
     include_context "with twilio_client stub"
 
     let(:create_params) do
@@ -33,7 +36,8 @@ RSpec.describe "Users", type: :request do
         phone_number: "+12223334444",
         password: "this-is-my-pretty-alright-password",
         password_confirmation: "this-is-my-pretty-alright-password",
-        timezone: Faker::Address.time_zone
+        timezone: timezone,
+        default_challenge_language_id: language.id
       }
     end
 
@@ -50,6 +54,15 @@ RSpec.describe "Users", type: :request do
       expect(user.confirmed).to be_falsey
       expect(user.confirmation_token).to be_a(String)
       expect(user.confirmation_token.length).to be >= 24
+    end
+
+    it "creates a new UserSettings model with correct timezone and default_challenge_language" do
+      expect { post_create }.to change(UserSettings, :count).by(1)
+
+      user_settings = UserSettings.first
+
+      expect(user_settings.timezone).to eql(timezone)
+      expect(user_settings.default_challenge_language.id).to eql(language.id)
     end
 
     context "when timezone is missing" do

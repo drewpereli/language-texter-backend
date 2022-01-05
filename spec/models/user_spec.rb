@@ -276,6 +276,9 @@ RSpec.describe User, type: :model do
   describe ".create_and_process" do
     subject(:create_and_process) { described_class.create_and_process(attrs) }
 
+    let(:timezone) { Faker::Address.time_zone }
+    let(:language) { create(:language) }
+
     include_context "with twilio_client stub"
 
     let(:attrs) do
@@ -286,7 +289,8 @@ RSpec.describe User, type: :model do
         phone_number: "222-333-4444",
         password: password,
         password_confirmation: password,
-        timezone: Faker::Address.time_zone
+        timezone: timezone,
+        default_challenge_language_id: language.id
       }
     end
 
@@ -294,8 +298,13 @@ RSpec.describe User, type: :model do
       expect { create_and_process }.to change(described_class, :count).by(1)
     end
 
-    it "creates a user settings model" do
+    it "creates a user settings model with the correct fields" do
       expect { create_and_process }.to change(UserSettings, :count).by(1)
+
+      user_settings = UserSettings.first
+
+      expect(user_settings.timezone).to eql(timezone)
+      expect(user_settings.default_challenge_language.id).to eql(language.id)
     end
 
     it "assigns the settings model to the user" do

@@ -81,7 +81,7 @@ class UsersController < ApplicationController
   private
 
   def create_params
-    params.require(:user).permit(:username, :phone_number, :password, :password_confirmation, :timezone)
+    params.require(:user).permit(:username, :phone_number, :password, :password_confirmation, :timezone, :default_challenge_language_id)
   end
 
   def login_params

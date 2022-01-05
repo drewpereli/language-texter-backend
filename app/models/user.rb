@@ -105,15 +105,15 @@ class User < ApplicationRecord
   end
 
   def self.create_and_process(attrs)
-    user = new(attrs.except(:timezone))
+    user = new(attrs.except(:timezone, :default_challenge_language_id))
 
-    return user unless attrs[:timezone].present?
+    return user unless attrs[:timezone].present? && attrs[:default_challenge_language_id].present?
 
     user.save
 
     return user unless user.persisted?
 
-    UserSettings.create(user: user, timezone: attrs[:timezone])
+    UserSettings.create(user: user, timezone: attrs[:timezone], default_challenge_language_id: attrs[:default_challenge_language_id])
 
     front_end_url = Rails.env.production? ? "www.learning_languagetexter.com" : "localhost:4200"
 
