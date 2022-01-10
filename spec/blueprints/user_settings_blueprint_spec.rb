@@ -9,15 +9,15 @@ RSpec.describe UserSettingsBlueprint do
   let(:user_settings) { user.user_settings }
 
   context "when default_challenge_language is not set" do
-    let(:serialized_default_challenge_language) { serialized["default_challenge_language"] }
+    let(:serialized_default_challenge_language_id) { serialized["default_challenge_language_id"] }
 
     it "renders nil for the attr" do
-      expect(serialized_default_challenge_language).to be_nil
+      expect(serialized_default_challenge_language_id).to be_nil
     end
   end
 
   context "when default_challenge_language is set" do
-    let(:serialized_default_challenge_language) { serialized["default_challenge_language"] }
+    let(:serialized_default_challenge_language_id) { serialized["default_challenge_language_id"] }
 
     let(:language) { create(:language) }
 
@@ -26,8 +26,8 @@ RSpec.describe UserSettingsBlueprint do
     end
 
     it "includes it in the serialized hash" do
-      expect(serialized_default_challenge_language).not_to be_empty
-      expect(serialized_default_challenge_language).to eql(JSON.parse(LanguageBlueprint.render(language)))
+      expect(serialized_default_challenge_language_id).not_to be_nil
+      expect(serialized_default_challenge_language_id).to eql(language.id)
     end
   end
 end

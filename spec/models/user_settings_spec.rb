@@ -16,7 +16,7 @@ RSpec.describe UserSettings, type: :model do
     context "when default_challenge_language_id is nil" do
       let(:default_challenge_language_id) { nil }
 
-      it { is_expected.to be_truthy }
+      it { is_expected.to be_falsey }
     end
 
     context "when default_challenge_language_id is valid" do

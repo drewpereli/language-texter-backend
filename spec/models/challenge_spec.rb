@@ -129,19 +129,6 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when language is missing and user doesn't have default learning language set" do
-      let(:language) { nil }
-
-      it "doesn't create a challenge" do
-        expect { create_and_process }.to change(described_class, :count).by(0)
-      end
-
-      it "doesn't text the student" do
-        expect_any_instance_of(User).not_to receive(:text)
-        create_and_process
-      end
-    end
-
     context "when language is missing and user has default learning language set" do
       let(:language) { nil }
       let(:default_language) { create(:language) }
