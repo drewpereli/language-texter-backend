@@ -73,8 +73,16 @@ class User < ApplicationRecord
 
   def appropriate_time_for_text?
     current_hour = Time.now.in_time_zone(user_settings.timezone).strftime("%H").to_i
+    current_minute = Time.now.in_time_zone(user_settings.timezone).strftime("%M").to_i
 
-    current_hour >= 8 && current_hour < 23
+    current_minutes = current_hour * 60 + current_minute
+
+    user_times = user_settings.numeric_text_times
+
+    min_minutes = user_times[:earliest][:hour] * 60 + user_times[:earliest][:minute]
+    max_minutes = user_times[:latest][:hour] * 60 + user_times[:latest][:minute]
+
+    current_minutes >= min_minutes && current_minutes <= max_minutes
   end
 
   def last_question

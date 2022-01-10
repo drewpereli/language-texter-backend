@@ -326,31 +326,42 @@ RSpec.describe User, type: :model do
 
     let(:timezone) { Faker::Address.time_zone }
 
-    let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
-    let(:hour_now) { 12 }
-    let(:minute_now) { 0 }
-
     before do
       allow(Time).to receive(:now).and_return(time_now)
 
       user.user_settings.timezone = timezone
+
+      user.user_settings.update(
+        earliest_text_time: earliest_text_time,
+        latest_text_time: latest_text_time
+      )
     end
 
-    context "when it is after 11 pm" do
-      let(:hour_now) { 23 }
-      let(:minute_now) { 30 }
+    test_examples = [
+      {hour_now: 20, minute_now: 10, expected_value: false},
+      {hour_now: 7, expected_value: false},
+      {hour_now: 21, minute_now: 0o0, expected_value: false},
+      {hour_now: 11, minute_now: 29, expected_value: false},
+      {hour_now: 20, minute_now: 0o1, expected_value: false},
+      {hour_now: 0, minute_now: 0, expected_value: false},
+      {hour_now: 0, minute_now: 30, expected_value: false},
+      {hour_now: 12, minute_now: 10, expected_value: true},
+      {hour_now: 11, minute_now: 30, expected_value: true},
+      {hour_now: 20, minute_now: 0o0, expected_value: true}
+    ]
 
-      it { is_expected.to be_falsey }
-    end
+    test_examples.each_with_index do |example, idx|
+      context "example #{idx}" do
+        let(:hour_now) { example[:hour_now].present? ? example[:hour_now] : 12 }
+        let(:minute_now) { example[:minute_now].present? ? example[:minute_now] : 0 }
+        let(:earliest_text_time) { example[:earliest_text_time].present? ? example[:earliest_text_time] : "11:30" }
+        let(:latest_text_time) { example[:latest_text_time].present? ? example[:latest_text_time] : "20:00" }
+        let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
 
-    context "when it is before 8 am" do
-      let(:hour_now) { 7 }
-
-      it { is_expected.to be_falsey }
-    end
-
-    context "when it is between 8 and 11" do
-      it { is_expected.to be_truthy }
+        it "works for example #{idx}" do
+          expect(appropriate_time_for_text?).to eql(example[:expected_value])
+        end
+      end
     end
   end
 
