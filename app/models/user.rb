@@ -38,7 +38,7 @@ class User < ApplicationRecord
 
     if last_question_waiting_on_attempt?
       last_question.send_reminder if last_question.needs_reminder?
-    elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
+    elsif enough_time_since_last_question?
       next_challenge&.new_question
     end
   end
@@ -72,8 +72,8 @@ class User < ApplicationRecord
   end
 
   def appropriate_time_for_text?
-    current_hour = Time.now.in_time_zone(user_settings.timezone).strftime("%H").to_i
-    current_minute = Time.now.in_time_zone(user_settings.timezone).strftime("%M").to_i
+    current_hour = time_now.strftime("%H").to_i
+    current_minute = time_now.strftime("%M").to_i
 
     current_minutes = current_hour * 60 + current_minute
 
@@ -110,6 +110,32 @@ class User < ApplicationRecord
     else
       challenges_assigned.active.sample
     end
+  end
+
+  def enough_time_since_last_question?
+    return false unless last_question&.attempted?
+
+    seconds_since_last_question = time_now - last_question.created_at.in_time_zone(user_settings.timezone)
+
+    seconds_required = question_frequency_hours.hours.in_seconds
+
+    seconds_since_last_question > seconds_required
+  end
+
+  def question_frequency_hours
+    freq = user_settings.question_frequency
+
+    {
+      "hourly_questions" => 1,
+      "questions_every_two_hours" => 2,
+      "questions_every_four_hours" => 4,
+      "questions_every_eight_hours" => 8,
+      "daily_questions" => 24
+    }[freq]
+  end
+
+  def time_now
+    Time.now.in_time_zone(user_settings.timezone)
   end
 
   def self.create_and_process(attrs)

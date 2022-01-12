@@ -568,13 +568,11 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when the last question has been answered and rand is less than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+    context "when the last question has been answered and it's been more than question_frequency" do
       before do
-        allow(user).to receive(:rand).and_return(0)
-
         create_list(:challenge, 10, student: user, status: "active")
 
-        question = create(:question, challenge: user.challenges_assigned.active.sample)
+        question = create(:question, challenge: user.challenges_assigned.active.sample, created_at: 5.hours.ago)
         create(:attempt, question: question)
       end
 
@@ -588,9 +586,12 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when the last question has been answered and rand is greater than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+    context "when the last question has been answered and it's been less than question_frequency" do
       before do
-        allow(user).to receive(:rand).and_return(1)
+        create_list(:challenge, 10, student: user, status: "active")
+
+        question = create(:question, challenge: user.challenges_assigned.active.sample)
+        create(:attempt, question: question)
       end
 
       it "does not create a new question" do
@@ -649,6 +650,78 @@ RSpec.describe User, type: :model do
       it "does not text the user" do
         send_question_if_time
         expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+  end
+
+  describe "#enough_time_since_last_question?" do
+    subject(:enough_time_since_last_question?) { user.enough_time_since_last_question? }
+
+    let(:user) { create(:user) }
+
+    let(:question_frequency) { "hourly_questions" }
+
+    let!(:challenges) { create_list(:challenge, 10, student: user) }
+    let!(:question) { create(:question, challenge: user.challenges_assigned.first) }
+    let!(:attempt) { create(:attempt, question: question) }
+
+    before do
+      user.user_settings.update(question_frequency: question_frequency)
+    end
+
+    context "when user has no assigned challenges" do
+      before do
+        user.challenges_assigned.destroy_all
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context "when last question hasn't been answered" do
+      before do
+        attempt.destroy
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context "when last question has been answered" do
+      context "when it has been less than question_frequency_hours since last question" do
+        it { is_expected.to be(false) }
+      end
+
+      context "when it has been more than question_frequency_hours since last question" do
+        before do
+          question.update(created_at: 2.hours.ago)
+        end
+
+        it { is_expected.to be(true) }
+      end
+    end
+  end
+
+  describe "#question_frequency_hours" do
+    subject(:question_frequency_hours?) { user.question_frequency_hours }
+
+    let(:user) { create(:user) }
+
+    before do
+      user.user_settings.update(question_frequency: question_frequency)
+    end
+
+    test_examples = [
+      {question_frequency: "hourly_questions", expected_result: 1},
+      {question_frequency: "questions_every_two_hours", expected_result: 2},
+      {question_frequency: "questions_every_four_hours", expected_result: 4},
+      {question_frequency: "questions_every_eight_hours", expected_result: 8},
+      {question_frequency: "daily_questions", expected_result: 24}
+    ]
+
+    test_examples.each do |example|
+      context "when question frequency is #{example[:question_frequency]}" do
+        let(:question_frequency) { example[:question_frequency] }
+
+        it { is_expected.to eql(example[:expected_result]) }
       end
     end
   end
