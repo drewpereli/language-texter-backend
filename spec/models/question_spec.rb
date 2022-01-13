@@ -66,6 +66,12 @@ RSpec.describe Question, type: :model do
   describe "#needs_reminder?" do
     subject(:needs_reminder?) { question.needs_reminder? }
 
+    let(:reminder_frequency) { "hourly_reminders" }
+
+    before do
+      question.student.user_settings.update(reminder_frequency: reminder_frequency)
+    end
+
     include_context "with twilio_client stub"
 
     context "when it's a newly-sent question" do
@@ -76,19 +82,37 @@ RSpec.describe Question, type: :model do
       it { is_expected.to be_falsey }
     end
 
-    context "when it was sent a while ago" do
+    context "when it was sent a long time ago and no reminders have been sent yet" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
-                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
       end
 
       it { is_expected.to be_truthy }
     end
 
+    context "when it was sent a long time ago and no reminders have been sent yet, but reminder frequency is low" do
+      let(:reminder_frequency) { "daily_reminders" }
+
+      let(:question) do
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it was sent a long time ago and no reminders have been sent yet but user has reminders off" do
+      let(:reminder_frequency) { "no_reminders" }
+
+      let(:question) do
+        create(:question, created_at: Time.now - 5.years, last_sent_at: Time.now - 5.years)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
     context "when it was sent a while ago but it's been attempted'" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
-                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
       end
 
       before do
@@ -100,7 +124,7 @@ RSpec.describe Question, type: :model do
 
     context "when it was sent a while ago but a reminder was sent recently" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute, last_sent_at: Time.now)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now)
       end
 
       it { is_expected.to be_falsey }

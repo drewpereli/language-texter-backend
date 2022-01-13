@@ -134,6 +134,17 @@ class User < ApplicationRecord
     }[freq]
   end
 
+  def reminder_frequency_hours
+    freq = user_settings.reminder_frequency
+
+    {
+      "no_reminders" => nil,
+      "hourly_reminders" => 1,
+      "reminders_every_four_hours" => 4,
+      "daily_reminders" => 24
+    }[freq]
+  end
+
   def time_now
     Time.now.in_time_zone(user_settings.timezone)
   end
