@@ -44,13 +44,15 @@ RSpec.describe "Challenges", type: :request do
     include_context "with twilio_client stub"
 
     let(:student) { create(:user) }
+    let(:language) { create(:language) }
 
     let(:create_params) do
       {
-        spanish_text: "amigo",
-        english_text: "friend",
+        learning_language_text: "amigo",
+        native_language_text: "friend",
         student_id: student.id,
-        required_score: 20
+        required_score: 20,
+        language_id: language.id
       }
     end
 
@@ -61,10 +63,11 @@ RSpec.describe "Challenges", type: :request do
     context "when student is not included" do
       let(:create_params) do
         {
-          spanish_text: "amigo",
-          english_text: "friend",
+          learning_language_text: "amigo",
+          native_language_text: "friend",
           student_id: nil,
-          required_score: 20
+          required_score: 20,
+          language_id: language.id
         }
       end
 
@@ -84,13 +87,13 @@ RSpec.describe "Challenges", type: :request do
     let!(:challenge) { create(:challenge, creator: user) }
 
     let(:update_params) do
-      {spanish_text: "my changed val"}
+      {learning_language_text: "my changed val"}
     end
 
     it "updates the requested Challenge" do
       put_update
       challenge.reload
-      expect(challenge.spanish_text).to eql("my changed val")
+      expect(challenge.learning_language_text).to eql("my changed val")
     end
   end
 

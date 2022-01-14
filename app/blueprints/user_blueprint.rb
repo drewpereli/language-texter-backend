@@ -10,8 +10,4 @@ class UserBlueprint < ApplicationBlueprint
   field :teacher_ids do |user|
     user.teachers.ids
   end
-
-  view :for_current_user do
-    association :user_settings, blueprint: UserSettingsBlueprint
-  end
 end

@@ -273,11 +273,10 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe ".create_and_send_confirmation" do
-    subject(:create_and_send_confirmation) { described_class.create_and_send_confirmation(attrs) }
+  describe ".create_and_process" do
+    subject(:create_and_process) { described_class.create_and_process(attrs) }
 
-    include_context "with twilio_client stub"
-
+    let(:timezone) { Faker::Address.time_zone }
     let(:attrs) do
       password = "#{Faker::Internet.password(min_length: 12, mix_case: true)}1"
 
@@ -286,26 +285,35 @@ RSpec.describe User, type: :model do
         phone_number: "222-333-4444",
         password: password,
         password_confirmation: password,
-        timezone: Faker::Address.time_zone
+        timezone: timezone,
+        default_challenge_language_id: language.id
       }
     end
+    let(:language) { create(:language) }
+
+    include_context "with twilio_client stub"
 
     it "creates a user" do
-      expect { create_and_send_confirmation }.to change(described_class, :count).by(1)
+      expect { create_and_process }.to change(described_class, :count).by(1)
     end
 
-    it "creates a user settings model" do
-      expect { create_and_send_confirmation }.to change(UserSettings, :count).by(1)
+    it "creates a user settings model with the correct fields" do
+      expect { create_and_process }.to change(UserSettings, :count).by(1)
+
+      user_settings = UserSettings.first
+
+      expect(user_settings.timezone).to eql(timezone)
+      expect(user_settings.default_challenge_language.id).to eql(language.id)
     end
 
     it "assigns the settings model to the user" do
-      user = create_and_send_confirmation
+      user = create_and_process
 
       expect(user.user_settings).not_to be_nil
     end
 
     it "sends a confirmation link to the user" do
-      create_and_send_confirmation
+      create_and_process
       expect(twilio_client).to have_received(:text_number).with("+12223334444",
                                                                 /^Please click this link to confirm your account/)
     end
@@ -318,31 +326,42 @@ RSpec.describe User, type: :model do
 
     let(:timezone) { Faker::Address.time_zone }
 
-    let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
-    let(:hour_now) { 12 }
-    let(:minute_now) { 0 }
-
     before do
       allow(Time).to receive(:now).and_return(time_now)
 
       user.user_settings.timezone = timezone
+
+      user.user_settings.update(
+        earliest_text_time: earliest_text_time,
+        latest_text_time: latest_text_time
+      )
     end
 
-    context "when it is after 11 pm" do
-      let(:hour_now) { 23 }
-      let(:minute_now) { 30 }
+    test_examples = [
+      {hour_now: 20, minute_now: 10, expected_value: false},
+      {hour_now: 7, expected_value: false},
+      {hour_now: 21, minute_now: 0o0, expected_value: false},
+      {hour_now: 11, minute_now: 29, expected_value: false},
+      {hour_now: 20, minute_now: 0o1, expected_value: false},
+      {hour_now: 0, minute_now: 0, expected_value: false},
+      {hour_now: 0, minute_now: 30, expected_value: false},
+      {hour_now: 12, minute_now: 10, expected_value: true},
+      {hour_now: 11, minute_now: 30, expected_value: true},
+      {hour_now: 20, minute_now: 0o0, expected_value: true}
+    ]
 
-      it { is_expected.to be_falsey }
-    end
+    test_examples.each_with_index do |example, idx|
+      context "example #{idx}" do
+        let(:hour_now) { example[:hour_now].present? ? example[:hour_now] : 12 }
+        let(:minute_now) { example[:minute_now].present? ? example[:minute_now] : 0 }
+        let(:earliest_text_time) { example[:earliest_text_time].present? ? example[:earliest_text_time] : "11:30" }
+        let(:latest_text_time) { example[:latest_text_time].present? ? example[:latest_text_time] : "20:00" }
+        let(:time_now) { Time.find_zone(timezone).local(2000, 1, 1, hour_now, minute_now, 0) }
 
-    context "when it is before 8 am" do
-      let(:hour_now) { 7 }
-
-      it { is_expected.to be_falsey }
-    end
-
-    context "when it is between 8 and 11" do
-      it { is_expected.to be_truthy }
+        it "works for example #{idx}" do
+          expect(appropriate_time_for_text?).to eql(example[:expected_value])
+        end
+      end
     end
   end
 
@@ -549,13 +568,11 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when the last question has been answered and rand is less than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+    context "when the last question has been answered and it's been more than question_frequency" do
       before do
-        allow(user).to receive(:rand).and_return(0)
-
         create_list(:challenge, 10, student: user, status: "active")
 
-        question = create(:question, challenge: user.challenges_assigned.active.sample)
+        question = create(:question, challenge: user.challenges_assigned.active.sample, created_at: 5.hours.ago)
         create(:attempt, question: question)
       end
 
@@ -569,9 +586,12 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when the last question has been answered and rand is greater than TIME_FOR_NEW_QUESTION_PROBABILITY" do
+    context "when the last question has been answered and it's been less than question_frequency" do
       before do
-        allow(user).to receive(:rand).and_return(1)
+        create_list(:challenge, 10, student: user, status: "active")
+
+        question = create(:question, challenge: user.challenges_assigned.active.sample)
+        create(:attempt, question: question)
       end
 
       it "does not create a new question" do
@@ -630,6 +650,78 @@ RSpec.describe User, type: :model do
       it "does not text the user" do
         send_question_if_time
         expect(twilio_client).not_to have_received(:text_number)
+      end
+    end
+  end
+
+  describe "#enough_time_since_last_question?" do
+    subject(:enough_time_since_last_question?) { user.enough_time_since_last_question? }
+
+    let(:user) { create(:user) }
+
+    let(:question_frequency) { "hourly_questions" }
+
+    let!(:challenges) { create_list(:challenge, 10, student: user) }
+    let!(:question) { create(:question, challenge: user.challenges_assigned.first) }
+    let!(:attempt) { create(:attempt, question: question) }
+
+    before do
+      user.user_settings.update(question_frequency: question_frequency)
+    end
+
+    context "when user has no assigned challenges" do
+      before do
+        user.challenges_assigned.destroy_all
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context "when last question hasn't been answered" do
+      before do
+        attempt.destroy
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context "when last question has been answered" do
+      context "when it has been less than question_frequency_hours since last question" do
+        it { is_expected.to be(false) }
+      end
+
+      context "when it has been more than question_frequency_hours since last question" do
+        before do
+          question.update(created_at: 2.hours.ago)
+        end
+
+        it { is_expected.to be(true) }
+      end
+    end
+  end
+
+  describe "#question_frequency_hours" do
+    subject(:question_frequency_hours?) { user.question_frequency_hours }
+
+    let(:user) { create(:user) }
+
+    before do
+      user.user_settings.update(question_frequency: question_frequency)
+    end
+
+    test_examples = [
+      {question_frequency: "hourly_questions", expected_result: 1},
+      {question_frequency: "questions_every_two_hours", expected_result: 2},
+      {question_frequency: "questions_every_four_hours", expected_result: 4},
+      {question_frequency: "questions_every_eight_hours", expected_result: 8},
+      {question_frequency: "daily_questions", expected_result: 24}
+    ]
+
+    test_examples.each do |example|
+      context "when question frequency is #{example[:question_frequency]}" do
+        let(:question_frequency) { example[:question_frequency] }
+
+        it { is_expected.to eql(example[:expected_result]) }
       end
     end
   end

@@ -52,7 +52,8 @@ RSpec.describe Challenge, type: :model do
     it "updates the challenge status and texts christina" do
       expect_any_instance_of(User)
         .to receive(:text)
-              .with("#{challenge.student.username} has completed the challenge \"#{challenge.spanish_text}\"!")
+              .with("#{challenge.student.username}"\
+                    " has completed the challenge \"#{challenge.learning_language_text}\"!")
               .and_return(nil)
 
       mark_as_complete
@@ -104,9 +105,17 @@ RSpec.describe Challenge, type: :model do
 
     let(:student) { create(:user) }
     let(:creator) { create(:user) }
+    let(:language) { create(:language) }
 
     let(:attrs) do
-      {spanish_text: "foo", english_text: "bar", student: student, creator: creator, required_score: 20}
+      {
+        learning_language_text: "foo",
+        native_language_text: "bar",
+        student: student,
+        creator: creator,
+        required_score: 20,
+        language: language
+      }
     end
 
     context "when attrs are all valid" do
@@ -120,10 +129,31 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when all attrs are valid but student and creator are same" do
-      let(:attrs) do
-        {spanish_text: "foo", english_text: "bar", student: student, creator: student, required_score: 20}
+    context "when language is missing and user has default learning language set" do
+      let(:language) { nil }
+      let(:default_language) { create(:language) }
+
+      before do
+        student.user_settings.update(default_challenge_language: default_language)
       end
+
+      it "creates a challenge" do
+        expect { create_and_process }.to change(described_class, :count).by(1)
+      end
+
+      it "assigns the default language to the challenge" do
+        create_and_process
+        expect(described_class.last&.language_id).to eql(default_language.id)
+      end
+
+      it "texts the student" do
+        create_and_process
+        expect(twilio_client).to have_received(:text_number).with(student.phone_number, /challenged added/)
+      end
+    end
+
+    context "when all attrs are valid but student and creator are same" do
+      let(:creator) { student }
 
       it "creates a challenge" do
         expect { create_and_process }.to change(described_class, :count).by(1)
@@ -135,22 +165,30 @@ RSpec.describe Challenge, type: :model do
       end
     end
 
-    context "when english text and spanish text has extra spaces" do
+    context "when native_language text and learning_language text has extra spaces" do
       let(:attrs) do
-        {spanish_text: "  foo    ", english_text: "  bar    ", student: student, creator: creator, required_score: 20}
+        {
+          learning_language_text: "   foo  ",
+          native_language_text: "  bar      ",
+          student: student,
+          creator: creator,
+          required_score: 20,
+          language: language
+        }
       end
 
       it "strips them" do
         challenge = create_and_process
 
-        expect(challenge.spanish_text).to eql("foo")
-        expect(challenge.english_text).to eql("bar")
+        expect(challenge.learning_language_text).to eql("foo")
+        expect(challenge.native_language_text).to eql("bar")
       end
     end
 
     context "when attrs are invalid" do
       let(:attrs) do
-        {spanish_text: nil, english_text: "bar", student: student, creator: creator, required_score: 20}
+        {learning_language_text: nil, native_language_text: "bar", student: student, creator: creator,
+         required_score: 20}
       end
 
       it "doesn't create a challenge" do

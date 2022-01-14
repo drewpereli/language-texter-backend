@@ -40,6 +40,9 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Enabled: false
 
+Metrics/ClassLength:
+  Enabled: false
+
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 

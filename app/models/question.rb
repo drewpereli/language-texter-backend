@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 class Question < ApplicationRecord
-  enum language: %i[spanish english]
+  enum language: %i[learning_language native_language]
 
   belongs_to :challenge
 
   has_one :student, through: :challenge
 
   has_one :attempt, dependent: :destroy
-
-  REMINDER_DELAY = 1.hour
 
   def send_message
     twilio_client.text_number(student.phone_number, message)
@@ -30,10 +28,10 @@ class Question < ApplicationRecord
   end
 
   def correct_text
-    if response_language == "english"
-      challenge.english_text
+    if response_language == "native_language"
+      challenge.native_language_text
     else
-      challenge.spanish_text
+      challenge.learning_language_text
     end
   end
 
@@ -42,10 +40,10 @@ class Question < ApplicationRecord
   end
 
   def response_language
-    if language == "spanish"
-      "english"
+    if language == "learning_language"
+      "native_language"
     else
-      "spanish"
+      "learning_language"
     end
   end
 
@@ -58,7 +56,11 @@ class Question < ApplicationRecord
   end
 
   def needs_reminder?
-    !attempted? && time_since_last_sent > REMINDER_DELAY
+    return false if attempted?
+
+    return false if student.user_settings.no_reminders?
+
+    time_since_last_sent > student.reminder_frequency_hours.hours
   end
 
   def self.current_active
@@ -70,27 +72,27 @@ class Question < ApplicationRecord
   private
 
   def message_challenge_portion
-    if spanish?
-      event_messages[:spanish_challenge]
+    if learning_language?
+      event_messages[:learning_language_challenge]
     else
-      event_messages[:english_challenge]
+      event_messages[:native_language_challenge]
     end
   end
 
   def message_note_portion
-    if spanish? && challenge.spanish_text_note.present?
-      event_messages[:spanish_note]
-    elsif english? && challenge.english_text_note.present?
-      event_messages[:english_note]
+    if learning_language? && challenge.learning_language_text_note.present?
+      event_messages[:learning_language_note]
+    elsif native_language? && challenge.native_language_text_note.present?
+      event_messages[:native_language_note]
     end
   end
 
   def event_message_variables
     {
-      spanish_text: challenge.spanish_text.strip,
-      english_text: challenge.english_text.strip,
-      spanish_note: challenge.spanish_text_note,
-      english_note: challenge.english_text_note
+      learning_language_text: challenge.learning_language_text.strip,
+      native_language_text: challenge.native_language_text.strip,
+      learning_language_note: challenge.learning_language_text_note,
+      native_language_note: challenge.native_language_text_note
     }
   end
 end

@@ -28,7 +28,7 @@ class User < ApplicationRecord
   has_many :students, through: :student_teachers_where_teacher
   has_many :teachers, through: :student_teachers_where_student
 
-  has_one :user_settings
+  has_one :user_settings, dependent: :destroy
 
   TIME_FOR_NEW_QUESTION_PROBABILITY = 0.1
   SEND_OLD_CHALLENGE_PROBABILITY = 0.1
@@ -38,7 +38,7 @@ class User < ApplicationRecord
 
     if last_question_waiting_on_attempt?
       last_question.send_reminder if last_question.needs_reminder?
-    elsif rand < TIME_FOR_NEW_QUESTION_PROBABILITY
+    elsif enough_time_since_last_question?
       next_challenge&.new_question
     end
   end
@@ -72,9 +72,17 @@ class User < ApplicationRecord
   end
 
   def appropriate_time_for_text?
-    current_hour = Time.now.in_time_zone(user_settings.timezone).strftime("%H").to_i
+    current_hour = time_now.strftime("%H").to_i
+    current_minute = time_now.strftime("%M").to_i
 
-    current_hour >= 8 && current_hour < 23
+    current_minutes = current_hour * 60 + current_minute
+
+    user_times = user_settings.numeric_text_times
+
+    min_minutes = user_times[:earliest][:hour] * 60 + user_times[:earliest][:minute]
+    max_minutes = user_times[:latest][:hour] * 60 + user_times[:latest][:minute]
+
+    current_minutes >= min_minutes && current_minutes <= max_minutes
   end
 
   def last_question
@@ -104,18 +112,56 @@ class User < ApplicationRecord
     end
   end
 
-  def self.create_and_send_confirmation(attrs)
-    user = new(attrs.except(:timezone))
+  def enough_time_since_last_question?
+    return false unless last_question&.attempted?
 
-    return user unless attrs[:timezone].present?
+    seconds_since_last_question = time_now - last_question.created_at.in_time_zone(user_settings.timezone)
+
+    seconds_required = question_frequency_hours.hours.in_seconds
+
+    seconds_since_last_question > seconds_required
+  end
+
+  def question_frequency_hours
+    freq = user_settings.question_frequency
+
+    {
+      "hourly_questions" => 1,
+      "questions_every_two_hours" => 2,
+      "questions_every_four_hours" => 4,
+      "questions_every_eight_hours" => 8,
+      "daily_questions" => 24
+    }[freq]
+  end
+
+  def reminder_frequency_hours
+    freq = user_settings.reminder_frequency
+
+    {
+      "no_reminders" => nil,
+      "hourly_reminders" => 1,
+      "reminders_every_four_hours" => 4,
+      "daily_reminders" => 24
+    }[freq]
+  end
+
+  def time_now
+    Time.now.in_time_zone(user_settings.timezone)
+  end
+
+  def self.create_and_process(attrs)
+    user = new(attrs.except(:timezone, :default_challenge_language_id))
+
+    return user unless attrs[:timezone].present? && attrs[:default_challenge_language_id].present?
 
     user.save
 
     return user unless user.persisted?
 
-    UserSettings.create(user: user, timezone: attrs[:timezone])
+    UserSettings.create(user: user, timezone: attrs[:timezone],
+                        default_challenge_language_id: attrs[:default_challenge_language_id])
 
-    front_end_url = Rails.env.production? ? "www.spanishtexter.com" : "localhost:4200"
+    front_end_url = Rails.env.production? ? "www.learning_languagetexter.com" : "localhost:4200"
 
     url = "#{front_end_url}/confirm-user?token=#{user.confirmation_token}&user_id=#{user.id}"
 

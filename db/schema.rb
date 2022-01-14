@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_022534) do
+ActiveRecord::Schema.define(version: 2022_01_12_055451) do
 
   create_table "attempts", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
@@ -25,16 +25,26 @@ ActiveRecord::Schema.define(version: 2021_11_02_022534) do
     t.datetime "created_at", precision: 6, null: false
     t.integer "creator_id", null: false
     t.integer "current_score", default: 0, null: false
-    t.string "english_text", null: false
-    t.string "english_text_note"
+    t.integer "language_id"
+    t.string "learning_language_text", null: false
+    t.string "learning_language_text_note"
+    t.string "native_language_text", null: false
+    t.string "native_language_text_note"
     t.integer "required_score", null: false
-    t.string "spanish_text", null: false
-    t.string "spanish_text_note"
     t.integer "status", default: 0, null: false
     t.integer "student_id", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["creator_id"], name: "index_challenges_on_creator_id"
+    t.index ["language_id"], name: "index_challenges_on_language_id"
     t.index ["student_id"], name: "index_challenges_on_student_id"
+  end
+
+  create_table "languages", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.string "name", null: false
+    t.string "native_name", null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "questions", force: :cascade do |t|
@@ -67,6 +77,11 @@ ActiveRecord::Schema.define(version: 2021_11_02_022534) do
 
   create_table "user_settings", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
+    t.integer "default_challenge_language_id", null: false
+    t.string "earliest_text_time", default: "09:00", null: false
+    t.string "latest_text_time", default: "22:00", null: false
+    t.integer "question_frequency", default: 0, null: false
+    t.integer "reminder_frequency", default: 2
     t.string "timezone", null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "user_id", null: false
@@ -77,6 +92,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_022534) do
     t.string "confirmation_token"
     t.boolean "confirmed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
+    t.string "language_learning", default: "es", null: false
     t.string "password_digest", null: false
     t.string "phone_number", null: false
     t.datetime "updated_at", precision: 6, null: false

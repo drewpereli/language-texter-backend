@@ -5,11 +5,12 @@ class Challenge < ApplicationRecord
 
   belongs_to :student, class_name: "User", foreign_key: "student_id"
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
+  belongs_to :language
 
   has_many :questions, dependent: :destroy
   has_many :attempts, through: :questions
 
-  validates :spanish_text, :english_text, :student, :creator, presence: true
+  validates :language, :learning_language_text, :native_language_text, :student, :creator, presence: true
 
   MAX_ACTIVE = 10
 
@@ -55,13 +56,14 @@ class Challenge < ApplicationRecord
 
   class << self
     def create_and_process(attrs)
-      attrs[:spanish_text] = attrs[:spanish_text]&.strip
-      attrs[:english_text] = attrs[:english_text]&.strip
+      # Make sure to see before_validate and before_save for some other stuff that's happening here
 
       create(attrs).tap do |challenge|
+        break challenge unless challenge.valid?
+
         challenge.update(status: "active") if need_more_active?
 
-        challenge.send_creation_message if challenge.valid? && challenge.creator.id != challenge.student.id
+        challenge.send_creation_message if challenge.creator.id != challenge.student.id
       end
     end
 
@@ -84,18 +86,27 @@ class Challenge < ApplicationRecord
 
   private
 
+  before_validation do |challenge|
+    challenge.language = challenge.student&.user_settings&.default_challenge_language unless challenge.language
+  end
+
+  before_save do |challenge|
+    challenge.learning_language_text = challenge.learning_language_text&.strip
+    challenge.native_language_text = challenge.native_language_text&.strip
+  end
+
   def random_language
     if rand < 0.66
-      "english"
+      "native_language"
     else
-      "spanish"
+      "learning_language"
     end
   end
 
   def event_message_variables
     {
-      spanish_text: spanish_text.strip,
-      english_text: english_text.strip,
+      learning_language_text: learning_language_text.strip,
+      native_language_text: native_language_text.strip,
       student_username: student.username
     }
   end

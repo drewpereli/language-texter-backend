@@ -13,7 +13,7 @@ class UsersController < ApplicationController
   def create
     authorize(User)
 
-    @user = User.create_and_send_confirmation(create_params)
+    @user = User.create_and_process(create_params)
 
     if @user.valid?
       render json: UserBlueprint.render(@user, root: :user)
@@ -23,7 +23,10 @@ class UsersController < ApplicationController
   end
 
   def me
-    render json: UserBlueprint.render(current_user, root: :user, view: :for_current_user)
+    render json: UserBlueprint.render_as_hash(current_user,
+                                              root: :user).merge(UserSettingsBlueprint.render_as_hash(
+                                                                   current_user.user_settings, root: :user_settings
+                                                                 ))
   end
 
   def change_password
@@ -81,7 +84,8 @@ class UsersController < ApplicationController
   private
 
   def create_params
-    params.require(:user).permit(:username, :phone_number, :password, :password_confirmation, :timezone)
+    params.require(:user).permit(:username, :phone_number, :password, :password_confirmation, :timezone,
+                                 :default_challenge_language_id)
   end
 
   def login_params

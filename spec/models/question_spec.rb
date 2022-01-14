@@ -6,49 +6,49 @@ RSpec.describe Question, type: :model do
   describe "#message" do
     subject(:message) { question.message }
 
-    let(:challenge) { create(:challenge, spanish_text: "foo", english_text: "bar") }
+    let(:challenge) { create(:challenge, learning_language_text: "foo", native_language_text: "bar") }
 
-    context "when language is spanish" do
-      let(:question) { create(:question, challenge: challenge, language: "spanish") }
+    context "when language is learning_language" do
+      let(:question) { create(:question, challenge: challenge, language: "learning_language") }
 
       it { is_expected.to eql("What does \"foo\" mean?") }
 
-      context "when the challenge has a spanish note" do
+      context "when the challenge has a learning_language note" do
         before do
-          challenge.update(spanish_text_note: "foo bar")
+          challenge.update(learning_language_text_note: "foo bar")
         end
 
         it { is_expected.to eql("What does \"foo\" mean? (Note: foo bar)") }
       end
 
-      context "when the challenge has a spanish note but it's an empty string" do
+      context "when the challenge has a learning_language note but it's an empty string" do
         before do
-          challenge.update(spanish_text_note: "")
+          challenge.update(learning_language_text_note: "")
         end
 
         it { is_expected.to eql("What does \"foo\" mean?") }
       end
     end
 
-    context "when language is english" do
-      let(:question) { create(:question, challenge: challenge, language: "english") }
+    context "when language is native_language" do
+      let(:question) { create(:question, challenge: challenge, language: "native_language") }
 
-      it { is_expected.to eql("How do you say \"bar\" in spanish?") }
+      it { is_expected.to eql("How do you say \"bar\" in learning_language?") }
 
-      context "when the challenge has an english note" do
+      context "when the challenge has an native_language note" do
         before do
-          challenge.update(english_text_note: "foo bar")
+          challenge.update(native_language_text_note: "foo bar")
         end
 
-        it { is_expected.to eql("How do you say \"bar\" in spanish? (Note: foo bar)") }
+        it { is_expected.to eql("How do you say \"bar\" in learning_language? (Note: foo bar)") }
       end
 
-      context "when the challenge has an english note but it's an empty string" do
+      context "when the challenge has an native_language note but it's an empty string" do
         before do
-          challenge.update(english_text_note: "")
+          challenge.update(native_language_text_note: "")
         end
 
-        it { is_expected.to eql("How do you say \"bar\" in spanish?") }
+        it { is_expected.to eql("How do you say \"bar\" in learning_language?") }
       end
     end
   end
@@ -66,6 +66,12 @@ RSpec.describe Question, type: :model do
   describe "#needs_reminder?" do
     subject(:needs_reminder?) { question.needs_reminder? }
 
+    let(:reminder_frequency) { "hourly_reminders" }
+
+    before do
+      question.student.user_settings.update(reminder_frequency: reminder_frequency)
+    end
+
     include_context "with twilio_client stub"
 
     context "when it's a newly-sent question" do
@@ -76,19 +82,37 @@ RSpec.describe Question, type: :model do
       it { is_expected.to be_falsey }
     end
 
-    context "when it was sent a while ago" do
+    context "when it was sent a long time ago and no reminders have been sent yet" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
-                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
       end
 
       it { is_expected.to be_truthy }
     end
 
+    context "when it was sent a long time ago and no reminders have been sent yet, but reminder frequency is low" do
+      let(:reminder_frequency) { "daily_reminders" }
+
+      let(:question) do
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context "when it was sent a long time ago and no reminders have been sent yet but user has reminders off" do
+      let(:reminder_frequency) { "no_reminders" }
+
+      let(:question) do
+        create(:question, created_at: Time.now - 5.years, last_sent_at: Time.now - 5.years)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
     context "when it was sent a while ago but it's been attempted'" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute,
-                          last_sent_at: Time.now - described_class::REMINDER_DELAY - 1.minute)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now - 5.hours)
       end
 
       before do
@@ -100,7 +124,7 @@ RSpec.describe Question, type: :model do
 
     context "when it was sent a while ago but a reminder was sent recently" do
       let(:question) do
-        create(:question, created_at: Time.now - described_class::REMINDER_DELAY - 1.minute, last_sent_at: Time.now)
+        create(:question, created_at: Time.now - 5.hours, last_sent_at: Time.now)
       end
 
       it { is_expected.to be_falsey }

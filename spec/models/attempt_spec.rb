@@ -36,69 +36,70 @@ RSpec.describe Attempt, type: :model do
     let(:u1) { create(:user, username: "u1") }
     let(:u2) { create(:user, username: "u2") }
     let(:challenge) do
-      create(:challenge, spanish_text: challenge_spanish_text, english_text: challenge_english_text, creator: u1,
+      create(:challenge, learning_language_text: challenge_learning_language_text,
+                         native_language_text: challenge_native_language_text, creator: u1,
                          student: u2)
     end
 
     let(:question) { create(:question, challenge: challenge, language: question_language) }
     let(:attempt) { create(:attempt, question: question, text: attempt_text) }
 
-    let(:challenge_spanish_text) { "amigo" }
-    let(:challenge_english_text) { "friend" }
+    let(:challenge_learning_language_text) { "amigo" }
+    let(:challenge_native_language_text) { "friend" }
 
-    context "when test is spanish and response is correct" do
-      let(:question_language) { "spanish" }
+    context "when test is learning_language and response is correct" do
+      let(:question_language) { "learning_language" }
       let(:attempt_text) { "friend" }
 
       it { is_expected.to be_truthy }
     end
 
-    context "when test is spanish and response is incorrect" do
-      let(:question_language) { "spanish" }
+    context "when test is learning_language and response is incorrect" do
+      let(:question_language) { "learning_language" }
       let(:attempt_text) { "asdfasdf" }
 
       it { is_expected.to be_falsey }
     end
 
-    context "when test is english and response is correct" do
-      let(:question_language) { "english" }
+    context "when test is native_language and response is correct" do
+      let(:question_language) { "native_language" }
       let(:attempt_text) { "amigo" }
 
       it { is_expected.to be_truthy }
     end
 
-    context "when test is english and response is incorrect" do
-      let(:question_language) { "english" }
+    context "when test is native_language and response is incorrect" do
+      let(:question_language) { "native_language" }
       let(:attempt_text) { "asdfasdf" }
 
       it { is_expected.to be_falsey }
     end
 
     context "when text matches but has extra whitespace" do
-      let(:question_language) { "english" }
+      let(:question_language) { "native_language" }
       let(:attempt_text) { "     amigo    " }
 
       it { is_expected.to be_truthy }
     end
 
     context "when text matches but has mismatched case" do
-      let(:question_language) { "english" }
+      let(:question_language) { "native_language" }
       let(:attempt_text) { "Amigo" }
 
       it { is_expected.to be_truthy }
     end
 
     context "when text matches but has extra punctuation" do
-      let(:question_language) { "english" }
+      let(:question_language) { "native_language" }
       let(:attempt_text) { "amigo?" }
 
       it { is_expected.to be_truthy }
     end
 
     context "when the text matches except for a contraction in the answer" do
-      let(:challenge_spanish_text) { "Cómo te llamas?" }
-      let(:challenge_english_text) { "What is your name?" }
-      let(:question_language) { "spanish" }
+      let(:challenge_learning_language_text) { "Cómo te llamas?" }
+      let(:challenge_native_language_text) { "What is your name?" }
+      let(:question_language) { "learning_language" }
       let(:attempt_text) { "What's your name?" }
 
       it { is_expected.to be_truthy }
