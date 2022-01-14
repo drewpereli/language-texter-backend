@@ -18,7 +18,7 @@ en:
       correct_complete: That's correct. Looks like you still know this one.
     student_teacher_invitations:
       invitation_message:
-        base: Hey there! %{creator_username} has invited you to be their %{requested_role} at spanishtexter.com.
+        base: Hey there! %{creator_username} has invited you to be their %{requested_role} at languagetexter.com.
         when_recipient_has_account: Click this link to create an account! %{link}
         when_recipient_does_not_have_account: Click this link to respond to the invitation! %{link}
       response_message:
