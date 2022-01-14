@@ -10,49 +10,93 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_14_035103) do
+ActiveRecord::Schema.define(version: 2022_01_12_055451) do
 
   create_table "attempts", force: :cascade do |t|
-    t.string "text", null: false
-    t.integer "query_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.integer "question_id", null: false
     t.integer "result_status"
-    t.index ["query_id"], name: "index_attempts_on_query_id"
+    t.string "text", null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["question_id"], name: "index_attempts_on_question_id"
   end
 
   create_table "challenges", force: :cascade do |t|
-    t.string "spanish_text", null: false
-    t.string "english_text", null: false
-    t.integer "required_streak_for_completion", default: 20, null: false
-    t.integer "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.integer "creator_id", null: false
+    t.integer "current_score", default: 0, null: false
+    t.integer "language_id"
+    t.string "learning_language_text", null: false
+    t.string "learning_language_text_note"
+    t.string "native_language_text", null: false
+    t.string "native_language_text_note"
+    t.integer "required_score", null: false
     t.integer "status", default: 0, null: false
-    t.integer "current_streak", default: 0, null: false
-    t.string "spanish_text_note"
-    t.string "english_text_note"
-    t.index ["user_id"], name: "index_challenges_on_user_id"
+    t.integer "student_id", null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["creator_id"], name: "index_challenges_on_creator_id"
+    t.index ["language_id"], name: "index_challenges_on_language_id"
+    t.index ["student_id"], name: "index_challenges_on_student_id"
   end
 
-  create_table "queries", force: :cascade do |t|
-    t.integer "language", null: false
-    t.integer "user_id", null: false
+  create_table "languages", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.string "name", null: false
+    t.string "native_name", null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "questions", force: :cascade do |t|
     t.integer "challenge_id", null: false
     t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "last_sent_at"
     t.boolean "for_already_completed_challenge", default: false, null: false
-    t.index ["challenge_id"], name: "index_queries_on_challenge_id"
-    t.index ["user_id"], name: "index_queries_on_user_id"
+    t.integer "language", default: 0, null: false
+    t.datetime "last_sent_at"
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["challenge_id"], name: "index_questions_on_challenge_id"
+  end
+
+  create_table "student_teacher_invitations", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.integer "creator_id", null: false
+    t.string "recipient_name", null: false
+    t.string "recipient_phone_number", null: false
+    t.integer "requested_role", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "student_teachers", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.integer "student_id", null: false
+    t.integer "teacher_id", null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["student_id", "teacher_id"], name: "index_student_teachers_on_student_id_and_teacher_id", unique: true
+  end
+
+  create_table "user_settings", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.integer "default_challenge_language_id", null: false
+    t.string "earliest_text_time", default: "09:00", null: false
+    t.string "latest_text_time", default: "22:00", null: false
+    t.integer "question_frequency", default: 0, null: false
+    t.integer "reminder_frequency", default: 2
+    t.string "timezone", null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "username", null: false
-    t.string "phone_number", null: false
-    t.string "password_digest", null: false
+    t.string "confirmation_token"
+    t.boolean "confirmed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
+    t.string "language_learning", default: "es", null: false
+    t.string "password_digest", null: false
+    t.string "phone_number", null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "username", null: false
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 

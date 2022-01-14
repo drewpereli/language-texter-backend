@@ -1,33 +1,26 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t 'hello'
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t('hello') %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# The following keys must be escaped otherwise they will not be retrieved by
-# the default I18n backend:
-#
-# true, false, on, off, yes, no
-#
-# Instead, surround them with single quotes.
-#
-# en:
-#   'true': 'foo'
-#
-# To learn more, please read the Rails Internationalization guide
-# available at https://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  event_messages:
+    challenges:
+      created: New challenged added! "#{learning_language_text}" / "#{native_language_text}"".
+      completed: '%{student_username} has completed the challenge "%{learning_language_text}"!'
+    questions:
+      learning_language_challenge: What does "%{learning_language_text}" mean?
+      native_language_challenge: How do you say "%{native_language_text}" in learning_language?
+      learning_language_note: '(Note: %{learning_language_note})'
+      native_language_note: '(Note: %{native_language_note})'
+      reminder_base: 'Reminder:'
+    attempts:
+      incorrect_active: That's incorrect. The correct answer is %{correct_text}.
+      correct_active_insufficient: Good job, that's correct! %{correct_attempts_still_required} more correct guesses in a row needed to complete this challenge.
+      correct_active_insufficient_1_more_required: Good job, that's correct! You only need 1 more correct guess to complete this challenge!
+      correct_active_sufficient: Good job, that's correct! You've completed this challenge!
+      incorrect_complete: That's incorrect. This challenge has been reactivated.
+      correct_complete: That's correct. Looks like you still know this one.
+    student_teacher_invitations:
+      invitation_message:
+        base: Hey there! %{creator_username} has invited you to be their %{requested_role} at languagetexter.com.
+        when_recipient_has_account: Click this link to create an account! %{link}
+        when_recipient_does_not_have_account: Click this link to respond to the invitation! %{link}
+      response_message:
+        accepted: '%{recipient_name} accepted your invitation!'
+        rejected: '%{recipient_name} rejected your invitation.'

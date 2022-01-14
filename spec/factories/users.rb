@@ -7,14 +7,14 @@ FactoryBot.define do
     end
 
     sequence :phone_number do |n|
-      "+1#{n.to_s.rjust(9, "0")}"
+      "+1222#{n.to_s.rjust(7, "0")}"
     end
 
-    password { "my-password" }
-    password_confirmation { "my-password" }
+    password { "my-long-password" }
+    password_confirmation { "my-long-password" }
 
-    trait :drew do
-      username { "drew" }
+    after(:create) do |user|
+      create(:user_settings, user: user)
     end
   end
 end

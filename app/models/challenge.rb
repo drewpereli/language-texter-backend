@@ -3,21 +3,23 @@
 class Challenge < ApplicationRecord
   enum status: %i[queued active complete]
 
-  belongs_to :user
+  belongs_to :student, class_name: "User", foreign_key: "student_id"
+  belongs_to :creator, class_name: "User", foreign_key: "creator_id"
+  belongs_to :language
 
-  has_many :queries, dependent: :destroy
-  has_many :attempts, through: :queries
+  has_many :questions, dependent: :destroy
+  has_many :attempts, through: :questions
 
-  validates :spanish_text, :english_text, :user, presence: true
+  validates :language, :learning_language_text, :native_language_text, :student, :creator, presence: true
 
   MAX_ACTIVE = 10
 
   def streak_enough_for_completion?
-    current_streak >= required_streak_for_completion
+    current_score >= required_score
   end
 
   def correct_attempts_still_required
-    [0, required_streak_for_completion - current_streak].max
+    [0, required_score - current_score].max
   end
 
   def mark_as_complete
@@ -25,37 +27,43 @@ class Challenge < ApplicationRecord
 
     self.class.first_in_queue&.active! if self.class.need_more_active?
 
-    christina = User.find_by(username: "christina")
-
-    christina&.text("Drew has completed the challenge \"#{spanish_text}\"!")
+    creator.text(event_messages[:completed]) unless creator_id == student_id
   end
 
   def process_attempt(attempt)
     case attempt.result_status
     when "incorrect_active"
-      update(current_streak: 0)
+      update(current_score: 0)
     when "correct_active_insufficient", "correct_complete"
-      increment!(:current_streak)
+      increment!(:current_score)
     when "correct_active_sufficient"
-      increment!(:current_streak)
+      increment!(:current_score)
       mark_as_complete
     when "incorrect_complete"
-      update(current_streak: 0)
+      update(current_score: 0)
       active!
     end
   end
 
+  def new_question
+    question = Question.create(challenge: self, language: random_language)
+    question.send_message
+  end
+
+  def send_creation_message
+    student.text(event_messages[:created])
+  end
+
   class << self
     def create_and_process(attrs)
-      attrs[:spanish_text] = attrs[:spanish_text]&.strip
-      attrs[:english_text] = attrs[:english_text]&.strip
+      # Make sure to see before_validate and before_save for some other stuff that's happening here
 
       create(attrs).tap do |challenge|
+        break challenge unless challenge.valid?
+
         challenge.update(status: "active") if need_more_active?
 
-        if challenge.valid?
-          User.drew.text("New challenged added! '#{challenge.spanish_text}' / '#{challenge.english_text}'.")
-        end
+        challenge.send_creation_message if challenge.creator.id != challenge.student.id
       end
     end
 
@@ -66,5 +74,40 @@ class Challenge < ApplicationRecord
     def first_in_queue
       queued.first
     end
+
+    def random_active_not_last
+      active.where.not(id: last_question.challenge_id).sample
+    end
+
+    def random_complete
+      complete.sample
+    end
+  end
+
+  private
+
+  before_validation do |challenge|
+    challenge.language = challenge.student&.user_settings&.default_challenge_language unless challenge.language
+  end
+
+  before_save do |challenge|
+    challenge.learning_language_text = challenge.learning_language_text&.strip
+    challenge.native_language_text = challenge.native_language_text&.strip
+  end
+
+  def random_language
+    if rand < 0.66
+      "native_language"
+    else
+      "learning_language"
+    end
+  end
+
+  def event_message_variables
+    {
+      learning_language_text: learning_language_text.strip,
+      native_language_text: native_language_text.strip,
+      student_username: student.username
+    }
   end
 end

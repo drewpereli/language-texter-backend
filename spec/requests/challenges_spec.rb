@@ -17,7 +17,7 @@ RSpec.describe "Challenges", type: :request do
     end
 
     before do
-      create_list(:challenge, 10, status: :queued)
+      create_list(:challenge, 10, status: :queued, student: user)
     end
 
     it "responds with the Challenge records " do
@@ -29,7 +29,7 @@ RSpec.describe "Challenges", type: :request do
   describe "GET show" do
     subject(:get_show) { get "/challenges/#{challenge.id}", headers: authenticated_headers }
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, student: user) }
 
     it "gets the requested Challenge" do
       get_show
@@ -41,20 +41,39 @@ RSpec.describe "Challenges", type: :request do
   describe "POST create" do
     subject(:post_create) { post "/challenges", params: {challenge: create_params}, headers: authenticated_headers }
 
+    include_context "with twilio_client stub"
+
+    let(:student) { create(:user) }
+    let(:language) { create(:language) }
+
     let(:create_params) do
       {
-        spanish_text: "amigo",
-        english_text: "friend"
+        learning_language_text: "amigo",
+        native_language_text: "friend",
+        student_id: student.id,
+        required_score: 20,
+        language_id: language.id
       }
-    end
-
-    before do
-      allow(User).to receive(:drew).and_return(user)
-      allow(user).to receive(:text).and_return(nil)
     end
 
     it "creates a new Challenge" do
       expect { post_create }.to change(Challenge, :count).by(1)
+    end
+
+    context "when student is not included" do
+      let(:create_params) do
+        {
+          learning_language_text: "amigo",
+          native_language_text: "friend",
+          student_id: nil,
+          required_score: 20,
+          language_id: language.id
+        }
+      end
+
+      it "creates a new Challenge" do
+        expect { post_create }.to change(Challenge, :count).by(1)
+      end
     end
   end
 
@@ -65,23 +84,23 @@ RSpec.describe "Challenges", type: :request do
           headers: authenticated_headers
     end
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, creator: user) }
 
     let(:update_params) do
-      {spanish_text: "my changed val"}
+      {learning_language_text: "my changed val"}
     end
 
     it "updates the requested Challenge" do
       put_update
       challenge.reload
-      expect(challenge.spanish_text).to eql("my changed val")
+      expect(challenge.learning_language_text).to eql("my changed val")
     end
   end
 
   describe "DELETE destroy" do
     subject(:delete_destroy) { delete "/challenges/#{challenge.id}", headers: authenticated_headers }
 
-    let!(:challenge) { create(:challenge) }
+    let!(:challenge) { create(:challenge, creator: user) }
 
     it "destroys the requested Challenge" do
       expect { delete_destroy }.to change(Challenge, :count).by(-1)

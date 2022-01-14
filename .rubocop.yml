@@ -31,6 +31,18 @@ Layout/SpaceInsideHashLiteralBraces:
 Metrics/BlockLength:
   Enabled: false
 
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
@@ -69,3 +81,8 @@ Naming/VariableNumber:
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented_relative_to_receiver
+
+RSpec/RepeatedExample: 
+  Enabled: true
+  Exclude:
+    - spec/policies/**/*

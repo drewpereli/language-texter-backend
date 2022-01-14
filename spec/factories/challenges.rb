@@ -2,14 +2,18 @@
 
 FactoryBot.define do
   factory :challenge do
-    user
+    student factory: :user
+    creator factory: :user
+    language
 
-    sequence :spanish_text do |n|
-      "my-spanish-text=#{n}"
+    sequence :learning_language_text do |n|
+      "my-learning_language-text=#{n}"
     end
 
-    sequence :english_text do |n|
-      "my-english-text=#{n}"
+    sequence :native_language_text do |n|
+      "my-native_language-text=#{n}"
     end
+
+    required_score { 20 }
   end
 end

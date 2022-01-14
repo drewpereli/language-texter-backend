@@ -18,15 +18,15 @@ RSpec.describe "Attempts", type: :request do
 
     let(:params) { {} }
 
-    let(:challenge_1) { create(:challenge) }
-    let(:challenge_2) { create(:challenge) }
+    let(:challenge_1) { create(:challenge, student: user) }
+    let(:challenge_2) { create(:challenge, creator: user) }
 
-    let!(:challenge_1_queries) { create_list(:query, 5, challenge: challenge_1) }
-    let!(:challenge_2_queries) { create_list(:query, 5, challenge: challenge_2) }
+    let!(:challenge_1_questions) { create_list(:question, 5, challenge: challenge_1) }
+    let!(:challenge_2_questions) { create_list(:question, 5, challenge: challenge_2) }
 
     before do
-      Query.all.each do |query|
-        create(:attempt, query: query)
+      Question.all.each do |question|
+        create(:attempt, question: question)
       end
     end
 
@@ -37,13 +37,13 @@ RSpec.describe "Attempts", type: :request do
 
       it "responds with the Attempt for the challenge " do
         get_index
-        expect(response_ids).to match_array(challenge_2.queries.map(&:attempt).map(&:id))
+        expect(response_ids).to match_array(challenge_2.questions.map(&:attempt).map(&:id))
         expect(response_ids.length).to be(5)
       end
     end
 
     context "when challenge_id is empty" do
-      it "responds with a 404 " do
+      it "responds with a 404" do
         get_index
         expect(response.status).to be(404)
       end

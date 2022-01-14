@@ -47,16 +47,21 @@ group :development, :test do
 end
 
 group :development do
+  gem "fix-db-schema-conflicts"
   gem "guard-rspec", require: false
   gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false
+end
+
+group :test do
+  gem "faker"
 end
 
 gem "bcrypt"
 
 gem "jwt"
 
-gem "active_model_serializers", "~> 0.10.0"
+gem "blueprinter"
 
 gem "twilio-ruby", "~> 5.57.1"
 
@@ -65,3 +70,7 @@ gem "whenever", require: false
 gem "pragmatic_tokenizer"
 
 gem "kaminari"
+
+gem "pundit"
+
+gem "phony_rails"
